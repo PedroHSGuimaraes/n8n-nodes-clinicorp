@@ -84,7 +84,8 @@ export const patientDescription: INodeProperties[] = [
 				name: 'cpf',
 				type: 'string',
 				default: '',
-				description: 'Patient CPF / other document (documento) recorded on the patient card',
+				description:
+					'Patient CPF / other document (documento) recorded on the patient card. Send only digits, e.g. 12345678909.',
 			},
 			{
 				displayName: 'Document ID',
@@ -121,7 +122,8 @@ export const patientDescription: INodeProperties[] = [
 				name: 'mobilePhone',
 				type: 'string',
 				default: '',
-				description: 'Mobile phone number of the patient (celular)',
+				description:
+					'Mobile phone number of the patient (celular), including country and area code, e.g. +55 21 99999-9999. Digits only (5521999999999) is also accepted.',
 			},
 			{
 				displayName: 'Notes',
@@ -162,7 +164,8 @@ export const patientDescription: INodeProperties[] = [
 				name: 'cpf',
 				type: 'string',
 				default: '',
-				description: 'Search by patient CPF / other document (documento)',
+				description:
+					'Search by patient CPF / other document (documento). Send only digits, e.g. 12345678909.',
 			},
 			{
 				displayName: 'Email',

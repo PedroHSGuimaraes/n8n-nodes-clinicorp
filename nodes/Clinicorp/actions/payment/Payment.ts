@@ -70,7 +70,8 @@ export const paymentDescription: INodeProperties[] = [
 			{ name: 'Reject', value: 'REJECT' },
 		],
 		displayOptions: { show: { ...showOnlyForPayments, operation: ['getHealthInsuranceClaims'] } },
-		description: 'Filter the health-insurance billing (guias de convênio) by reconciliation status',
+		description:
+			'Filter the health-insurance billing (guias de convênio) by reconciliation status. One of: ALL (all claims), OPEN (awaiting payment), DISPUTE (under appeal), REJECT (denied/glosa), PARTIAL_PAID (partially paid), PAID (fully paid).',
 	},
 
 	// ----- Get Many -----

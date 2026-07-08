@@ -54,7 +54,8 @@ export const crmDescription: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		displayOptions: { show: { ...showOnlyForCrm, operation: ['addLead'] } },
-		description: 'Phone number of the lead',
+		description:
+			'Phone number of the lead, including country and area code, e.g. +55 21 99999-9999. Digits only (5521999999999) is also accepted.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -69,7 +70,8 @@ export const crmDescription: INodeProperties[] = [
 				name: 'boardName',
 				type: 'string',
 				default: '',
-				description: 'The CRM campaign/board to add the lead to',
+				description:
+					'Name of the CRM campaign/board to add the lead to. It must match an existing campaign name exactly (same case, spaces and accents) — run the CRM "Get Active Campaigns" operation first and copy the "Name" value. Do not invent a name: if it does not match, the lead is not attached to the campaign.',
 			},
 			{
 				displayName: 'Notes',

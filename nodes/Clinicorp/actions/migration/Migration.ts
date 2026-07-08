@@ -53,7 +53,8 @@ export const migrationDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForMigration, operation: ['createFromConnection'] } },
-		description: 'Type of migration to perform for the source system',
+		description:
+			'Type of migration to perform for the source system, as agreed with Clinicorp support, e.g. Full or Partial. Do not guess this value — confirm it with Clinicorp before running a migration.',
 	},
 	{
 		displayName: 'Host',
@@ -116,7 +117,8 @@ export const migrationDescription: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		displayOptions: { show: { ...showOnlyForMigration, operation: ['createFromFile'] } },
-		description: 'Type of migration to perform for the uploaded file',
+		description:
+			'Type of migration to perform for the uploaded file, as agreed with Clinicorp support, e.g. Full or Partial. Do not guess this value — confirm it with Clinicorp before running a migration.',
 	},
 
 	// ----- Get Upload URL -----

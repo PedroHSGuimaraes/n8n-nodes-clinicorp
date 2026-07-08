@@ -19,7 +19,7 @@ export class Clinicorp implements INodeType {
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		description:
-			'Read and write data in Clinicorp, the dental and clinic management platform. Query estimates (orçamentos), patients, appointments (agenda), financial reports, payments, sales and conversion, procedures, professionals, clinics, CRM leads, analytics and goals; and create patients, appointments, CRM leads and purchase orders. Authenticates with your Clinicorp API user and token (HTTP Basic). Usable as an AI Agent tool.',
+			'Read and write data in Clinicorp, the dental and clinic management platform. Query estimates (orçamentos), patients, appointments (agenda), financial reports, payments, sales and conversion, procedures, professionals, clinics, CRM leads, analytics and goals; and create patients, appointments, CRM leads and purchase orders. Conventions: dates are sent as YYYY-MM-DD and times as 24-hour HH:mm; IDs (clinic, professional, status) must come from the matching list operation, never invented; the Subscriber ID is taken from the credential when the field is left empty. To book an appointment, first read availability (Clinic > Get Available Times, or Appointment > Get Available Times when using a booking Code Link), then call Appointment > Create with that exact slot. Usable as an AI Agent tool.',
 		defaults: {
 			name: 'Clinicorp',
 		},

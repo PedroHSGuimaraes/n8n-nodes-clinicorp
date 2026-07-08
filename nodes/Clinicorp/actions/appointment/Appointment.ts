@@ -20,90 +20,91 @@ export const appointmentDescription: INodeProperties[] = [
 				value: 'cancel',
 				action: 'Cancel an appointment',
 				description:
-					"Cancel a scheduled appointment (cancelar agendamento), releasing the time slot in the professional's calendar",
+					"Cancel a scheduled appointment (cancelar agendamento) by its ID, releasing the time slot in the professional's calendar. Find the appointment ID with Get Many. This does not delete the patient record.",
 			},
 			{
 				name: 'Change Status',
 				value: 'changeStatus',
 				action: 'Change appointment status',
 				description:
-					'Change the status of one or more appointments (e.g. confirmed, attended or missed) by their IDs',
+					'Change the status of one or more appointments by ID (e.g. attended, missed, in service). Pick the target status from the Status dropdown, which is loaded from the account — never invent a status ID. Find appointment IDs with Get Many. To simply mark an appointment as confirmed, prefer the Confirm operation.',
 			},
 			{
 				name: 'Confirm',
 				value: 'confirm',
 				action: 'Confirm an appointment',
 				description:
-					'Confirm a scheduled appointment (confirmar agendamento) so it is marked as confirmed in the calendar',
+					'Confirm a scheduled appointment (confirmar agendamento) by its ID so it is marked as confirmed in the calendar. Find the appointment ID with Get Many.',
 			},
 			{
 				name: 'Create',
 				value: 'create',
 				action: 'Create an appointment',
 				description:
-					"Create a new appointment (criar agendamento) in a clinic's calendar for a professional and patient",
+					"Book an appointment directly in the clinic's internal calendar (criar agendamento na agenda) for a given clinic, professional, date and time range. Use this when the clinic books on behalf of the patient. Before booking, find a free slot with Clinic > Get Available Times (by professional and clinic) or Appointment > Get Available Times (by booking Code Link), then pass exactly that From Time and To Time. For a patient self-service request through the public booking link, use Create Online Scheduling instead.",
 			},
 			{
 				name: 'Create Online Scheduling',
 				value: 'createOnlineScheduling',
 				action: 'Create an online scheduling request',
 				description:
-					'Create an online scheduling request (agendamento online) that patients can submit through the booking link',
+					"Create an online scheduling request (solicitação de agendamento online) — the same request a patient submits through the clinic's public booking link. Pick a valid slot first with Get Available Days and Get Available Times (both take the Code Link). To book straight into the internal calendar instead, use Create.",
 			},
 			{
 				name: 'Get',
 				value: 'get',
 				action: 'Get an appointment',
-				description: 'Retrieve a single appointment by its ID using the clinic booking code link',
+				description:
+					'Retrieve one appointment/scheduling request by its ID. Requires the clinic booking Code Link. To find appointment IDs, use Get Many.',
 			},
 			{
 				name: 'Get Available Days',
 				value: 'getAvailableDays',
 				action: 'Get available days',
 				description:
-					'List the days that have availability for online scheduling within a date range for a given booking link',
+					'List which days have free slots for online scheduling in a date range, for a clinic booking Code Link. Use it before Create Online Scheduling to pick a valid date. Optionally returns each day time slots.',
 			},
 			{
 				name: 'Get Available Times',
 				value: 'getAvailableTimes',
 				action: 'Get available times',
 				description:
-					'List the available time slots for a specific day and booking link for online scheduling',
+					'List the free time slots of ONE specific day for online scheduling, for a clinic booking Code Link. Use a returned time as From Time when booking. If you do not have a Code Link and want availability by professional, use Clinic > Get Available Times instead.',
 			},
 			{
 				name: 'Get Info',
 				value: 'getInfo',
 				action: 'Get appointment info',
 				description:
-					'Retrieve aggregated appointment information (indicators) for the clinics in a date range',
+					'Retrieve aggregated appointment indicators for a date range: total appointments, first-time appointments, no-shows and categories. Returns totals, not individual appointments — to list the agenda use Get Many.',
 			},
 			{
 				name: 'Get Many',
 				value: 'getMany',
 				action: 'Get many appointments',
 				description:
-					'List the appointments of the clinics in a date range, optionally filtered by patient or including canceled ones',
+					'Read the agenda: list the individual appointments of a clinic in a date range, with patient name, email, start time and duration. Requires a clinic and the date range. Optionally filter by patient or include canceled ones. For totals/indicators use Get Info instead.',
 			},
 			{
 				name: 'Get Many Categories',
 				value: 'getManyCategories',
 				action: 'Get many appointment categories',
 				description:
-					'List the appointment categories (categorias de agendamento) configured for the account',
+					'List the appointment categories (categorias de agendamento) configured for the account, with their ID, description and color. Use a returned description/color when creating an appointment.',
 			},
 			{
 				name: 'Get Occupation',
 				value: 'getOccupation',
 				action: 'Get schedule occupation',
 				description:
-					'Retrieve the schedule occupation (ocupação de agenda) for the clinics in a date range',
+					'Retrieve how busy the agenda is (ocupação de agenda) in a date range: minutes available, minutes booked and the occupation percentage. Returns aggregated metrics, not individual appointments.',
 			},
 			{
 				name: 'Get Statuses',
 				value: 'getStatuses',
 				action: 'Get appointment statuses',
 				description:
-					'List the appointment statuses (status de agendamento) configured for the account',
+					'List the appointment statuses (status de agendamento) configured for the account, with their IDs. Use them with the Change Status operation.',
 			},
 		],
 		default: 'getMany',
@@ -180,7 +181,8 @@ export const appointmentDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['create'] } },
-		description: 'Start time of the appointment, e.g. 14:00',
+		description:
+			'Start time of the appointment in 24-hour HH:mm format, e.g. 14:00. It must be a slot that is actually free — check it first with Clinic > Get Available Times or Appointment > Get Available Times.',
 	},
 	{
 		displayName: 'To Time',
@@ -189,7 +191,8 @@ export const appointmentDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['create'] } },
-		description: 'End time of the appointment, e.g. 14:30',
+		description:
+			'End time of the appointment in 24-hour HH:mm format, e.g. 14:30. It must be later than From Time and respect the procedure duration used by the clinic.',
 	},
 	{
 		displayName: 'Clinic Name or ID',
@@ -226,7 +229,8 @@ export const appointmentDescription: INodeProperties[] = [
 				name: 'categoryColor',
 				type: 'string',
 				default: '',
-				description: 'Color used to identify the appointment category in the calendar',
+				description:
+					'Color used to identify the appointment category in the calendar, as a hex code, e.g. #009688',
 			},
 			{
 				displayName: 'Category Description',
@@ -247,21 +251,24 @@ export const appointmentDescription: INodeProperties[] = [
 				name: 'mobilePhone',
 				type: 'string',
 				default: '',
-				description: 'Mobile phone number of the patient',
+				description:
+					'Mobile phone number of the patient, including country and area code, e.g. +55 21 99999-9999',
 			},
 			{
 				displayName: 'Patient Person ID',
 				name: 'patientPersonId',
 				type: 'string',
 				default: '',
-				description: 'Existing patient person ID (id da pessoa) to link the appointment to',
+				description:
+					'Existing patient person ID (id da pessoa) to link the appointment to. Find it with the Patient > Get operation. Leave empty to book using only the patient name.',
 			},
 			{
 				displayName: 'Procedures',
 				name: 'procedures',
 				type: 'string',
 				default: '',
-				description: 'Procedures associated with the appointment',
+				description:
+					'Procedures associated with the appointment, as a plain text string. To list several, separate them with commas, e.g. Limpeza, Restauração. Use the Procedure resource ("Get Many") to see the procedures available in the price lists.',
 			},
 			{
 				displayName: 'Schedule To ID',
@@ -275,7 +282,8 @@ export const appointmentDescription: INodeProperties[] = [
 				name: 'scheduleToType',
 				type: 'string',
 				default: '',
-				description: 'Type of the resource or entity the appointment is scheduled to',
+				description:
+					'Type of the resource the appointment is scheduled to, matching the Schedule To ID, e.g. Dentist for a professional agenda or Chair for a chair agenda. Leave empty to use the clinic default.',
 			},
 		],
 	},
@@ -340,7 +348,8 @@ export const appointmentDescription: INodeProperties[] = [
 				name: 'codeLink',
 				type: 'string',
 				default: '',
-				description: 'Booking code link (code link) that identifies the online scheduling page',
+				description:
+					'Access code (code_link) that identifies the clinic online scheduling page. It is the code at the end of the clinic online booking URL. It is not the clinic ID and cannot be guessed — get it from the clinic booking link.',
 			},
 			{
 				displayName: 'Email',
@@ -368,7 +377,8 @@ export const appointmentDescription: INodeProperties[] = [
 				name: 'mobilePhone',
 				type: 'string',
 				default: '',
-				description: 'Mobile phone number of the patient',
+				description:
+					'Mobile phone number of the patient, including country and area code, e.g. +55 21 99999-9999',
 			},
 			{
 				displayName: 'Notes',
@@ -423,7 +433,8 @@ export const appointmentDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['get'] } },
-		description: 'Booking code link (code link) that identifies the clinic scheduling page',
+		description:
+			'Access code (code_link) that identifies the clinic online scheduling page. It is the code at the end of the clinic online booking URL. It is not the clinic ID and cannot be guessed — get it from the clinic booking link.',
 	},
 	{
 		displayName: 'Appointment ID',
@@ -443,7 +454,8 @@ export const appointmentDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['getAvailableDays'] } },
-		description: 'Booking code link (code link) that identifies the online scheduling page',
+		description:
+			'Access code (code_link) that identifies the clinic online scheduling page. It is the code at the end of the clinic online booking URL. It is not the clinic ID and cannot be guessed — get it from the clinic booking link.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -504,7 +516,8 @@ export const appointmentDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['getAvailableTimes'] } },
-		description: 'Booking code link (code link) that identifies the online scheduling page',
+		description:
+			'Access code (code_link) that identifies the clinic online scheduling page. It is the code at the end of the clinic online booking URL. It is not the clinic ID and cannot be guessed — get it from the clinic booking link.',
 	},
 
 	// ----- Get Info -----

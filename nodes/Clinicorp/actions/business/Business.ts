@@ -20,7 +20,7 @@ export const businessDescription: INodeProperties[] = [
 				value: 'getAvailableTimes',
 				action: 'Get available times',
 				description:
-					'List the available time slots for the given professional and clinic between the informed dates',
+					"List the free time slots (horários livres) of a professional's agenda in a clinic, between two dates. This is the availability lookup to use before booking with Appointment > Create: take a returned slot and pass it as From Time / To Time. It does not need a booking Code Link — for the public online-booking availability use Appointment > Get Available Times instead.",
 			},
 			{
 				name: 'Get Chairs',
