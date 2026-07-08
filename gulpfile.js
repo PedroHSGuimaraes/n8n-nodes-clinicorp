@@ -1,12 +1,11 @@
 const path = require('path');
 const { task, src, dest } = require('gulp');
 
-// Copy node/credential icons (.png/.svg) and node codex files (.node.json)
-// into dist, preserving folder structure.
+// Copy node/credential icons (.png/.svg) into dist, preserving folder structure.
 task('build:icons', copyAssets);
 
 function copyAssets() {
-	const nodeSource = path.resolve('nodes', '**', '*.{png,svg,json}');
+	const nodeSource = path.resolve('nodes', '**', '*.{png,svg}');
 	const nodeDestination = path.resolve('dist', 'nodes');
 	src(nodeSource, { base: 'nodes' }).pipe(dest(nodeDestination));
 

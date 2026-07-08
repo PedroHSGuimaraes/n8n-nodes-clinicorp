@@ -193,6 +193,7 @@ n8n-nodes-clinicorp/
 
 ## 📈 Versões
 
+- **1.0.1** — Correção: o node não aparecia na busca de ações do editor (embora instalasse e funcionasse ao colar). Causa: o pacote publicava um arquivo codex (`*.node.json`) que fazia o n8n categorizar o node fora da busca normal. O codex deixou de ser publicado (mesma abordagem do node RD Station). O node continua utilizável como Tool de IA (`usableAsTool` fica na descrição do node, não no codex).
 - **1.0.0** — Primeira versão. Node único `Clinicorp` (Recurso → Operação) com 17 recursos e ~49 operações; credencial HTTP Basic com teste embutido; Subscriber ID reaproveitável pela credencial; dropdowns dinâmicos (clínicas, profissionais, status, categorias, especialidades, procedimentos); `usableAsTool: true` com descrições otimizadas para IA; publicação no npm com provenance via GitHub Actions.
 
 ## 🆘 Suporte
