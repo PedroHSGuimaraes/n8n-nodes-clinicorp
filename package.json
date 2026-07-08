@@ -1,0 +1,64 @@
+{
+  "name": "n8n-nodes-clinicorp",
+  "version": "1.0.0",
+  "description": "n8n community node for Clinicorp (dental & clinic management SaaS): estimates, patients, appointments, financial, payments, sales, procedures, professionals, clinics, CRM leads, analytics and more. Usable as an AI Agent tool.",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "clinicorp",
+    "clinic",
+    "dental",
+    "odontologia",
+    "healthcare",
+    "estimates",
+    "appointments",
+    "patients"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/PedroHSGuimaraes/n8n-nodes-clinicorp#readme",
+  "author": {
+    "name": "Pedro Henrique Santos Guimarães",
+    "email": "pedro.guimaraes02@hotmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PedroHSGuimaraes/n8n-nodes-clinicorp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PedroHSGuimaraes/n8n-nodes-clinicorp/issues"
+  },
+  "main": "dist/nodes/Clinicorp/Clinicorp.node.js",
+  "scripts": {
+    "build": "tsc && gulp build:icons",
+    "dev": "tsc --watch",
+    "format": "prettier nodes credentials --write",
+    "lint": "eslint nodes credentials package.json",
+    "lintfix": "eslint nodes credentials package.json --fix",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/ClinicorpApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Clinicorp/Clinicorp.node.js"
+    ]
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "devDependencies": {
+    "@n8n/eslint-plugin-community-nodes": "^0.23.0",
+    "@types/node": "^18.19.0",
+    "eslint": "^9.29.0",
+    "gulp": "^4.0.2",
+    "n8n-workflow": "^2.16.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.63.0"
+  }
+}
