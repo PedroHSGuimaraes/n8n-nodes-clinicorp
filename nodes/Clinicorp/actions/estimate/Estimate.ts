@@ -9,8 +9,8 @@ import { toApiDate } from '../../helpers/format';
 //   2. `execute<Resource>(operation, i)` = programmatic dispatch via the transport
 // Conventions: displayNames in Title Case; operation names + descriptions in
 // Sentence case; options alphabetically sorted; loadOptions fields suffixed
-// "Name or ID"; every field has a default; the global "Subscriber ID" field is
-// resolved with getSubscriberId() so it can fall back to the credential.
+// "Name or ID"; every field has a default. The Subscriber ID is never a node
+// parameter — getSubscriberId() reads it from the credential.
 // ---------------------------------------------------------------------------
 
 const showOnlyForEstimates = {

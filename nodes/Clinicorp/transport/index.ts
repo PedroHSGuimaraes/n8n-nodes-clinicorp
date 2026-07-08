@@ -48,26 +48,19 @@ export async function clinicorpApiRequest(
 }
 
 /**
- * Resolve the Subscriber ID for the current item.
- *
- * Precedence: the node's Subscriber ID field (if filled) → the Default Subscriber
- * ID stored in the credential. Throws a clear error when neither is available.
+ * Read the Subscriber ID (id do Assinante) from the `clinicorpApi` credential.
+ * It is never a node parameter, so it can't be left out or guessed.
  */
 export async function getSubscriberId(this: IExecuteFunctions, i: number): Promise<string> {
-	const fromParam = (this.getNodeParameter('subscriberId', i, '') as string).trim();
-	if (fromParam) {
-		return fromParam;
-	}
-
 	const credentials = await this.getCredentials('clinicorpApi');
-	const fromCredential = ((credentials?.subscriberId as string) ?? '').trim();
-	if (fromCredential) {
-		return fromCredential;
+	const subscriberId = ((credentials?.subscriberId as string) ?? '').trim();
+	if (subscriberId) {
+		return subscriberId;
 	}
 
 	throw new NodeOperationError(
 		this.getNode(),
-		'No Subscriber ID provided. Fill the "Subscriber ID" field on the node, or set a "Default Subscriber ID" in the Clinicorp API credential.',
+		'No Subscriber ID found. Open the Clinicorp API credential and fill in the "Subscriber ID" field.',
 		{ itemIndex: i },
 	);
 }

@@ -35,12 +35,13 @@ export class ClinicorpApi implements ICredentialType {
 				'Your Clinicorp API token (the "Token API"), found next to the API user under Gerenciar Assinatura → Acesso Externo e Integrações → Integrações. It is sent as the Basic Auth password.',
 		},
 		{
-			displayName: 'Default Subscriber ID',
+			displayName: 'Subscriber ID',
 			name: 'subscriberId',
 			type: 'string',
 			default: '',
+			required: true,
 			description:
-				'Your Clinicorp subscriber/account ID (id do Assinante). Most operations require it. Set it here once and it is used automatically whenever the Subscriber ID field is left empty on the node.',
+				'Your Clinicorp subscriber/account ID (id do Assinante). Find it in Clinicorp under Gerenciar Assinatura. Almost every endpoint requires it, and the node sends it automatically on every request.',
 		},
 	];
 

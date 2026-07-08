@@ -14,7 +14,7 @@ Com um **único node** você consulta e cria dados no Clinicorp: orçamentos, pa
 
 - **1 node unificado** — `Clinicorp` com seletor **Recurso → Operação**. 17 recursos e ~49 operações cobrindo toda a API pública do Clinicorp.
 - **Autenticação simples** — credencial única com **Usuário API** e **Token API** (HTTP Basic). Inclui um **teste embutido** que valida as credenciais antes de rodar o fluxo.
-- **Subscriber ID reaproveitável** — informe o **id do Assinante** uma vez na credencial e ele é usado automaticamente em toda operação que precisa dele (ou sobrescreva por node). Veja [Subscriber ID](#-subscriber-id-id-do-assinante).
+- **Zero repetição de Subscriber ID** — o **id do Assinante** vive na credencial (campo obrigatório) e é enviado automaticamente em toda operação. Não existe esse campo no node. Veja [Subscriber ID](#-subscriber-id-id-do-assinante).
 - **Dropdowns dinâmicos** — clínicas, profissionais, status de agendamento, categorias, especialidades e procedimentos são carregados direto da sua conta: você escolhe pelo nome, sem copiar IDs.
 - **Datas amigáveis** — campos de data usam o seletor `dateTime` do n8n e são convertidos para o formato que o Clinicorp espera (`YYYY-MM-DD` ou `YYYYMMDD`) automaticamente.
 - **Usável como Tool de IA** — o node tem `usableAsTool: true`, então um **AI Agent** do n8n pode chamar qualquer operação (buscar orçamentos, criar paciente, agendar, enviar lead…) preenchendo os parâmetros sozinho via `$fromAI()`. Todas as descrições de operações e campos foram escritas para o LLM entender. Veja [Usar como Tool de Agente de IA](#-usar-como-tool-de-agente-de-ia).
@@ -46,7 +46,7 @@ Como encontrar essas informações no Clinicorp:
 3. Clique em **Acesso Externo e Integrações**.
 4. Em **Integrações**, copie o **Usuário API** (username) e o **Token API** (password).
 
-No n8n, crie uma credencial **Clinicorp API**, cole o usuário e o token e (opcionalmente) preencha o **Default Subscriber ID**. A credencial tem um **teste embutido** que chama `GET /professional/list_all_professionals`, então dá pra validar antes de rodar o fluxo.
+No n8n, crie uma credencial **Clinicorp API**, cole o usuário e o token e preencha o **Subscriber ID** (obrigatório). A credencial tem um **teste embutido** que chama `GET /professional/list_all_professionals`, então dá pra validar antes de rodar o fluxo.
 
 | Item | Valor |
 | --- | --- |
@@ -56,12 +56,13 @@ No n8n, crie uma credencial **Clinicorp API**, cole o usuário e o token e (opci
 
 ## 🆔 Subscriber ID (id do Assinante)
 
-Quase toda operação do Clinicorp precisa do **`subscriber_id`** (o id do Assinante/conta). Para não repetir isso em cada node:
+Quase toda operação do Clinicorp precisa do **`subscriber_id`** (o id do Assinante/conta). Ele fica **só na credencial**, como campo **obrigatório**, e o node o envia automaticamente em toda requisição.
 
-- Preencha o **Default Subscriber ID** na **credencial** — ele passa a ser usado automaticamente sempre que o campo do node estiver vazio.
-- Ou preencha o campo **Subscriber ID** no próprio node quando quiser sobrescrever (ex.: alternar entre contas).
+- **Não existe campo Subscriber ID no node.** Você configura uma vez na credencial e esquece.
+- Para trabalhar com mais de uma conta, crie **uma credencial por assinante** e escolha a credencial no node.
+- Se a credencial estiver sem o Subscriber ID, as operações que o exigem retornam um erro claro pedindo para preenchê-lo.
 
-Se nenhum dos dois estiver preenchido, as operações que exigem `subscriber_id` retornam um erro claro pedindo para configurá-lo.
+> Isso também deixa o node mais seguro como **Tool de IA**: o agente não consegue inventar (nem vazar) o id do Assinante, porque ele nunca é um parâmetro de entrada.
 
 ## 🧩 Nós e Operações
 
@@ -130,13 +131,13 @@ Em cada campo do node em modo tool aparece o botão **"Let the model define this
 ```
 
 - Assinatura: `$fromAI(key, description?, type?, defaultValue?)` — `key` de 1–64 caracteres (`[a-zA-Z0-9_-]`); `type` = `string` | `number` | `boolean` | `json`.
-- Você pode **misturar**: fixar alguns campos (ex.: deixar o **Subscriber ID** vindo da credencial) e deixar o modelo preencher outros (datas, filtros, nome do paciente).
+- Você pode **misturar**: deixar o modelo preencher datas, filtros e nome do paciente (o Subscriber ID nunca é um campo — vem da credencial).
 - As **descrições de cada operação e campo** deste node foram escritas para o LLM entender o que cada uma faz e como preencher — quanto mais específico o seu prompt/System Message do agente, melhor o resultado.
 
 ### Boas práticas
 
 - **Restrinja o escopo:** exponha só as operações que o agente precisa (ex.: só *Get Many* de Estimate e Appointment), em vez de liberar tudo.
-- **Credencial dedicada** com o **Default Subscriber ID** já configurado, para o agente não precisar adivinhar o id do Assinante.
+- **Credencial dedicada** por assinante — o Subscriber ID vive na credencial, então o agente nunca precisa (nem consegue) adivinhá-lo.
 - **n8n atualizado:** versões antigas tinham um bug em que a tool de community node retornava resposta vazia para o agente ([n8n#26202](https://github.com/n8n-io/n8n/issues/26202)); já corrigido.
 
 ### Referências
@@ -193,6 +194,7 @@ n8n-nodes-clinicorp/
 
 ## 📈 Versões
 
+- **1.1.0** — **Subscriber ID sai do node e vira obrigatório na credencial.** O campo *Subscriber ID* foi removido de todas as operações; agora ele é preenchido uma única vez na credencial **Clinicorp API** (campo obrigatório) e enviado automaticamente. Menos configuração por node, e o agente de IA não consegue mais inventar o id do Assinante. Para múltiplas contas, use uma credencial por assinante.
 - **1.0.2** — **Menos alucinação da IA.** Passada de descrições focada em uso como Tool de Agente: as operações de **agenda** (ver e marcar) ganharam desambiguação explícita — *Appointment → Create* (agenda interna) vs *Create Online Scheduling* (solicitação pelo link público), e *Appointment → Get Available Times* (por Code Link) vs *Clinic → Get Available Times* (por profissional) — além do encadeamento recomendado (consultar disponibilidade → criar com o horário exato). Enum de convênio passa a listar os valores válidos (`ALL`, `OPEN`, `DISPUTE`, `REJECT`, `PARTIAL_PAID`, `PAID`); telefone, CPF, cor de categoria e horários ganharam formato + exemplo; `Board Name` do CRM instrui a copiar o nome exato de *Get Active Campaigns*; e a descrição do node passa a declarar as convenções (datas `YYYY-MM-DD`, horas `HH:mm`, IDs sempre vindos da operação de listagem, Subscriber ID vindo da credencial).
 - **1.0.1** — Correção: o node não aparecia na busca de ações do editor (embora instalasse e funcionasse ao colar). Causa: o pacote publicava um arquivo codex (`*.node.json`) que fazia o n8n categorizar o node fora da busca normal. O codex deixou de ser publicado (mesma abordagem do node RD Station). O node continua utilizável como Tool de IA (`usableAsTool` fica na descrição do node, não no codex).
 - **1.0.0** — Primeira versão. Node único `Clinicorp` (Recurso → Operação) com 17 recursos e ~49 operações; credencial HTTP Basic com teste embutido; Subscriber ID reaproveitável pela credencial; dropdowns dinâmicos (clínicas, profissionais, status, categorias, especialidades, procedimentos); `usableAsTool: true` com descrições otimizadas para IA; publicação no npm com provenance via GitHub Actions.
