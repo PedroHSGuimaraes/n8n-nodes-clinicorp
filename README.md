@@ -1,5 +1,7 @@
 # n8n-nodes-clinicorp
 
+[![CI](https://github.com/PedroHSGuimaraes/n8n-nodes-clinicorp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/PedroHSGuimaraes/n8n-nodes-clinicorp/actions/workflows/ci.yml)
+
 Node community do [n8n](https://n8n.io/) para integrar seus fluxos com o **[Clinicorp](https://www.clinicorp.com/)** — o sistema de gestão para clínicas e consultórios (odontologia e saúde).
 
 Com um **único node** você consulta e cria dados no Clinicorp: orçamentos, pacientes, agendamentos, financeiro, pagamentos, vendas, procedimentos, profissionais, clínicas, leads de CRM, analytics, metas e mais. Autenticação simples por **usuário + token da API** (HTTP Basic), e o node é **usável como Tool de Agente de IA**.
@@ -194,6 +196,7 @@ n8n-nodes-clinicorp/
 
 ## 📈 Versões
 
+- **1.1.1** — Documentação: adicionado selo do GitHub Actions no README e workflow de CI para validar lint e build.
 - **1.1.0** — **Subscriber ID sai do node e vira obrigatório na credencial.** O campo *Subscriber ID* foi removido de todas as operações; agora ele é preenchido uma única vez na credencial **Clinicorp API** (campo obrigatório) e enviado automaticamente. Menos configuração por node, e o agente de IA não consegue mais inventar o id do Assinante. Para múltiplas contas, use uma credencial por assinante.
 - **1.0.2** — **Menos alucinação da IA.** Passada de descrições focada em uso como Tool de Agente: as operações de **agenda** (ver e marcar) ganharam desambiguação explícita — *Appointment → Create* (agenda interna) vs *Create Online Scheduling* (solicitação pelo link público), e *Appointment → Get Available Times* (por Code Link) vs *Clinic → Get Available Times* (por profissional) — além do encadeamento recomendado (consultar disponibilidade → criar com o horário exato). Enum de convênio passa a listar os valores válidos (`ALL`, `OPEN`, `DISPUTE`, `REJECT`, `PARTIAL_PAID`, `PAID`); telefone, CPF, cor de categoria e horários ganharam formato + exemplo; `Board Name` do CRM instrui a copiar o nome exato de *Get Active Campaigns*; e a descrição do node passa a declarar as convenções (datas `YYYY-MM-DD`, horas `HH:mm`, IDs sempre vindos da operação de listagem, Subscriber ID vindo da credencial).
 - **1.0.1** — Correção: o node não aparecia na busca de ações do editor (embora instalasse e funcionasse ao colar). Causa: o pacote publicava um arquivo codex (`*.node.json`) que fazia o n8n categorizar o node fora da busca normal. O codex deixou de ser publicado (mesma abordagem do node RD Station). O node continua utilizável como Tool de IA (`usableAsTool` fica na descrição do node, não no codex).
