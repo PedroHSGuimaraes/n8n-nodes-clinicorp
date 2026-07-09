@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-clinicorp",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "n8n community node for Clinicorp (dental & clinic management SaaS): estimates, patients, appointments, financial, payments, sales, procedures, professionals, clinics, CRM leads, analytics and more. Usable as an AI Agent tool.",
   "keywords": [
     "n8n-community-node-package",
