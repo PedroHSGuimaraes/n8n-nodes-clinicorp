@@ -1,6 +1,6 @@
 # Clinicorp: node-cli 0.55 e campos guiados (versão 2 do node)
 
-**Approved**: pendente
+**Approved**: 2026-11-06 - user: "Aprovo com antecedência (Recomendado · Jev 0,96)"
 
 > Build this with **tlc-implement**. Every criterion becomes a check with a proof; nothing under
 > the open questions is settled while building.
