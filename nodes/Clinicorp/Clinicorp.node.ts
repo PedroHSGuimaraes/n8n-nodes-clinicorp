@@ -77,12 +77,14 @@ export class Clinicorp implements INodeType {
 					});
 					continue;
 				}
-				// Erro da API continua NodeApiError (o n8n mostra o código HTTP e a resposta); só
-				// marcamos o item. O n8n reaproveita a causa quando o erro já é um NodeApiError.
+				// Erro da API continua NodeApiError (o n8n mostra o código HTTP e a resposta). Reembrulhar
+				// com `new NodeApiError(..., { itemIndex })` não serve: o construtor devolve o erro
+				// original sem aplicar o índice. Por isso gravamos o índice no contexto do próprio erro,
+				// como a 1.1.2 fazia com o NodeOperationError (o n8n mostra "item N" por ele).
 				if (error instanceof NodeApiError) {
-					throw new NodeApiError(this.getNode(), error as unknown as JsonObject, {
-						itemIndex: i,
-					});
+					error.context.itemIndex = i;
+					// O lint oficial exige `throw new NodeApiError`; o construtor devolve este mesmo erro.
+					throw new NodeApiError(this.getNode(), error as unknown as JsonObject);
 				}
 				throw new NodeOperationError(this.getNode(), error as Error, { itemIndex: i });
 			}

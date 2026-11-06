@@ -363,6 +363,32 @@ describe('S4 toda chamada tem timeout', () => {
 		assert.match(saida[0][0].json.error, /connection was aborted/);
 	});
 
+	// Regressão do F1 da revisão: na 1.1.2 o erro de API saía com o índice do item (itemIndex 0);
+	// reenviar o NodeApiError sem aplicar o índice some com o "item N" que o n8n mostra no erro.
+	for (const versao of [1, 2]) {
+		it(`erro de API na v${versao} mantém o índice do item`, async () => {
+			const falha = () => {
+				const erro = new Error('boom');
+				erro.httpCode = '500';
+				throw erro;
+			};
+			await assert.rejects(
+				executar({
+					recurso: 'patient',
+					operacao: 'get',
+					parametros: { patientId: 'p1', additionalFilters: {} },
+					typeVersion: versao,
+					resposta: falha,
+				}),
+				(erro) => {
+					assert.equal(erro.name, 'NodeApiError');
+					assert.equal(erro.context.itemIndex, 0);
+					return true;
+				},
+			);
+		});
+	}
+
 	it('loadOptions e teste de credencial levam timeout', async () => {
 		const contexto = criarContexto({ resposta: [] });
 		await loadOptions.getProcedures.call(contexto);
