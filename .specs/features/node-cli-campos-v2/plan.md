@@ -92,7 +92,7 @@ Workflow salvo na versão 1 envia exatamente a mesma requisição da 1.1.2.
 
 **Acceptance Criteria**
 
-1. WHEN o `execute` roda com `typeVersion` 1, `resource` `patient`, `operation` `get` e `patientId` `'p1'` THEN o sistema SHALL chamar `GET /patient/get` na base api.clinicorp.com/rest/v1 com a query `patient_id=p1` e a credencial `clinicorpApi`
+1. WHEN o `execute` roda com `typeVersion` 1, `resource` `patient`, `operation` `get` e `patientId` `'p1'` THEN o sistema SHALL chamar `GET /patient/get` na base api.clinicorp.com/rest/v1 com a query `subscriber_id` da credencial e `PatientId=p1`, e a credencial `clinicorpApi`
 2. WHEN o `execute` roda com `typeVersion` 1, `resource` `appointment`, `operation` `create` e `procedures` `'Limpeza, Restauração'` THEN o corpo de `POST /appointment/create_appointment_by_api` SHALL levar `Procedures` igual a `Limpeza, Restauração`
 3. The node SHALL listar, para `@version` 1, todo parâmetro com o mesmo `name` e o mesmo `type` da 1.1.2
 4. IF `fromTime` na versão 1 chega como `'9h'` THEN o sistema SHALL enviar `'9h'` sem validar, como na 1.1.2
@@ -110,7 +110,7 @@ Em node novo, procedimentos e sexo são listas, e horário e ID têm dica e vali
 5. WHEN o editor pede `getProcedures` THEN o sistema SHALL chamar `GET /procedures/list` uma vez e devolver `{ name, value }` com o nome do procedimento nos dois campos, ordenado por nome
 6. IF `fromTime` ou `toTime` na versão 2 não casa com `HH:mm` de 00:00 a 23:59 THEN o sistema SHALL lançar `NodeOperationError` antes de qualquer requisição, com a mensagem `The 'From Time' parameter must use the 24-hour format HH:mm [item 0]`
    - `14:00` → aceito; `00:00` → aceito; `23:59` → aceito; `24:00` → erro; `9h` → erro; `9:5` → erro
-7. IF um ID obrigatório de paciente, agendamento ou orçamento chega vazio ou só com espaços na versão 2 THEN o sistema SHALL lançar `NodeOperationError` antes de qualquer requisição, com a descrição que diz de qual operação sai o ID
+7. IF um ID obrigatório de agendamento (Cancel, Confirm, Change Status) ou de orçamento (Get) chega vazio ou só com espaços na versão 2 THEN o sistema SHALL lançar `NodeOperationError` antes de qualquer requisição, com a descrição que diz de qual operação sai o ID
    - `' p1 '` → envia `p1` (espaço das pontas removido); `''` → erro; `'   '` → erro
 8. The node SHALL ter, em cada campo de ID de paciente, agendamento e orçamento da versão 2, um `placeholder` e uma `description` que dizem de qual operação o ID sai (Patient > Get, Appointment > Get Many, Estimate > Get Many)
 
@@ -154,6 +154,7 @@ A versão nova chega ao npm pelo fluxo stage-only, com README completo.
 | Valores aceitos de sexo | `M` e `F` | A descrição atual do campo diz "e.g. M or F"; a doc oficial não lista os valores | n |
 | `timeout` de 30000 ms | 30 segundos em toda chamada | Acima do p99 esperado de uma API de gestão clínica; a doc não publica limite | n |
 | Procedimentos na criação de agendamento | Enviar os nomes juntos por vírgula | É o formato da 1.1.2; a doc não confirma ID | n |
+| Query do paciente | Patient > Get continua enviando `PatientId` como na 1.1.2, embora a doc cite `patient_id`; o ID de paciente é opcional (há filtros por nome, CPF, e-mail e telefone), então só ganha dica | Mudar o nome da query alteraria a versão 1; a doc publicada é a mais rasa que a do código | n |
 | Campos que já são lista (clínica, profissional, status) | Ficam como estão nas duas versões | Já são guiados; mudar só trocaria o formato | n |
 | Mensagens e rótulos do node | Continuam em inglês, como hoje e como o resto do n8n | A UX guideline do n8n escreve em inglês | n |
 | Padrão de teste | `node --test test/*.test.cjs` sobre o `dist`, com contexto falso que grava a requisição | O repo não tem teste; segue o modelo do Vizard | n |
