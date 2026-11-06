@@ -53,7 +53,7 @@ export const fileDescription: INodeProperties[] = [
 				name: 'patientId',
 				type: 'string',
 				default: '',
-				description: 'ID of the patient (id do paciente) the file belongs to',
+				description: 'ID of the patient (ID do paciente) the file belongs to',
 			},
 			{
 				displayName: 'Patient Name',
@@ -77,7 +77,7 @@ export async function executeFile(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	if (operation === 'upload') {
 		const url = this.getNodeParameter('url', i, '') as string;
 		const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IDataObject;

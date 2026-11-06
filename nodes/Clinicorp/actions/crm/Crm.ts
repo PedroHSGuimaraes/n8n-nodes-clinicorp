@@ -44,6 +44,7 @@ export const crmDescription: INodeProperties[] = [
 		displayName: 'Email',
 		name: 'email',
 		type: 'string',
+		placeholder: 'name@email.com',
 		default: '',
 		displayOptions: { show: { ...showOnlyForCrm, operation: ['addLead'] } },
 		description: 'Email address of the lead',
@@ -88,7 +89,7 @@ export async function executeCrm(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	if (operation === 'addLead') {
 		const subscriberId = await getSubscriberId.call(this, i);
 		const name = this.getNodeParameter('name', i) as string;

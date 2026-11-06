@@ -2,13 +2,15 @@
 
 [![CI](https://github.com/PedroHSGuimaraes/n8n-nodes-clinicorp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/PedroHSGuimaraes/n8n-nodes-clinicorp/actions/workflows/ci.yml)
 
+[![Apoie no Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-Apoie_o_projeto-FFDD00?logo=buy-me-a-coffee&logoColor=000000)](https://buymeacoffee.com/qTny0AzFXS)
+
 Node community do [n8n](https://n8n.io/) para integrar seus fluxos com o **[Clinicorp](https://www.clinicorp.com/)** — o sistema de gestão para clínicas e consultórios (odontologia e saúde).
 
 Com um **único node** você consulta e cria dados no Clinicorp: orçamentos, pacientes, agendamentos, financeiro, pagamentos, vendas, procedimentos, profissionais, clínicas, leads de CRM, analytics, metas e mais. Autenticação simples por **usuário + token da API** (HTTP Basic), e o node é **usável como Tool de Agente de IA**.
 
 [n8n](https://n8n.io/) é uma plataforma de automação de fluxos com [licença fair-code](https://docs.n8n.io/reference/license/).
 
-[Instalação](#-instalação) · [Credenciais](#-credenciais) · [Nós e Operações](#-nós-e-operações) · [Subscriber ID](#-subscriber-id-id-do-assinante) · [Tool de IA](#-usar-como-tool-de-agente-de-ia) · [Desenvolvimento](#️-desenvolvimento) · [Versões](#-versões)
+[Instalação](#-instalação) · [Credenciais](#-credenciais) · [Nós e Operações](#-nós-e-operações) · [Subscriber ID](#-subscriber-id-id-do-assinante) · [Tool de IA](#-usar-como-tool-de-agente-de-ia) · [Exemplos](#-exemplos) · [Desenvolvimento](#️-desenvolvimento) · [Publicação](#-publicação) · [Versões](#-versões) · [Apoie](#-apoie-o-projeto)
 
 ---
 
@@ -18,9 +20,10 @@ Com um **único node** você consulta e cria dados no Clinicorp: orçamentos, pa
 - **Autenticação simples** — credencial única com **Usuário API** e **Token API** (HTTP Basic). Inclui um **teste embutido** que valida as credenciais antes de rodar o fluxo.
 - **Zero repetição de Subscriber ID** — o **id do Assinante** vive na credencial (campo obrigatório) e é enviado automaticamente em toda operação. Não existe esse campo no node. Veja [Subscriber ID](#-subscriber-id-id-do-assinante).
 - **Dropdowns dinâmicos** — clínicas, profissionais, status de agendamento, categorias, especialidades e procedimentos são carregados direto da sua conta: você escolhe pelo nome, sem copiar IDs.
+- **Campos guiados (node versão 2)** — em node novo, os procedimentos de um agendamento são uma lista da sua conta, o sexo do paciente e a cor da categoria são seletores, e horários `HH:mm` e IDs obrigatórios são validados **antes** de a requisição sair. Workflows salvos continuam na versão 1 e não mudam.
 - **Datas amigáveis** — campos de data usam o seletor `dateTime` do n8n e são convertidos para o formato que o Clinicorp espera (`YYYY-MM-DD` ou `YYYYMMDD`) automaticamente.
 - **Usável como Tool de IA** — o node tem `usableAsTool: true`, então um **AI Agent** do n8n pode chamar qualquer operação (buscar orçamentos, criar paciente, agendar, enviar lead…) preenchendo os parâmetros sozinho via `$fromAI()`. Todas as descrições de operações e campos foram escritas para o LLM entender. Veja [Usar como Tool de Agente de IA](#-usar-como-tool-de-agente-de-ia).
-- **Zero dependências de runtime** — usa o `httpRequestWithAuthentication` do próprio n8n. Passa no ESLint `@n8n/eslint-plugin-community-nodes` (0 erros) e é publicado no npm **com provenance**.
+- **Zero dependências de runtime** — usa o `httpRequestWithAuthentication` do próprio n8n. Passa no lint oficial `n8n-node lint` (0 erros), toda chamada tem **timeout de 30 s** e o pacote é publicado no npm **com provenance**.
 
 ## 📦 Instalação
 
@@ -90,18 +93,6 @@ O pacote traz **um node de ação** (`Clinicorp`) com seletor **Recurso → Oper
 | **Migration** (Migração) | Create From Connection, Create From File, Get Upload URL |
 | **File** (Arquivo) | Upload |
 
-### Exemplo — listar orçamentos do mês
-
-1. **Clinicorp** → Recurso **Estimate**, Operação **Get Many**.
-2. Defina **From Date** e **To Date** (o node envia como `YYYY-MM-DD`).
-3. Opcional: escolha a **Clinic** pelo dropdown para filtrar uma clínica específica.
-4. O `subscriber_id` vem automaticamente da credencial.
-
-### Exemplo — criar um paciente e um lead de CRM
-
-1. **Clinicorp** → Recurso **Patient**, Operação **Create** (informe o **Name** e os campos adicionais).
-2. **Clinicorp** → Recurso **CRM**, Operação **Add Lead**, usando o nome/e-mail do paciente.
-
 ## 🤖 Usar como Tool de Agente de IA
 
 O node `Clinicorp` é **usável como tool** por nós de **AI Agent** do n8n (Tools Agent). Isso deixa o modelo **consultar e agir no Clinicorp sozinho** — por exemplo: *"quantos orçamentos foram criados este mês e qual a taxa de conversão?"* ou *"agende a Maria para amanhã às 14h com o Dr. João"*.
@@ -148,24 +139,44 @@ Em cada campo do node em modo tool aparece o botão **"Let the model define this
 - [Let AI specify tool parameters (`$fromAI`) — n8n Docs](https://docs.n8n.io/advanced-ai/examples/using-the-fromai-function/)
 - [Variáveis de ambiente de nodes — n8n Docs](https://docs.n8n.io/hosting/configuration/environment-variables/nodes/)
 
+## 💡 Exemplos
+
+### listar orçamentos do mês
+
+1. **Clinicorp** → Recurso **Estimate**, Operação **Get Many**.
+2. Defina **From Date** e **To Date** (o node envia como `YYYY-MM-DD`).
+3. Opcional: escolha a **Clinic** pelo dropdown para filtrar uma clínica específica.
+4. O `subscriber_id` vem automaticamente da credencial.
+
+### criar um paciente e um lead de CRM
+
+1. **Clinicorp** → Recurso **Patient**, Operação **Create** (informe o **Name** e os campos adicionais).
+2. **Clinicorp** → Recurso **CRM**, Operação **Add Lead**, usando o nome/e-mail do paciente.
+
+### Agendar com procedimentos (node versão 2)
+
+1. **Clinicorp** → Recurso **Appointment**, Operação **Get Available Times** (ou **Clinic → Get Available Times**) para ver os horários livres.
+2. **Clinicorp** → Recurso **Appointment**, Operação **Create**. Preencha o horário no formato `HH:mm` (por exemplo `14:00`); o node recusa `9h` ou `24:00` antes de chamar o Clinicorp.
+3. Em **Additional Fields**, adicione **Procedures** e escolha os procedimentos na lista da sua conta. O node os envia ao Clinicorp separados por vírgula.
+
 ## 🛠️ Desenvolvimento
 
 ```bash
 # Instalar dependências
 npm install
 
-# Compilar (tsc + cópia de ícones via gulp)
+# Compilar (n8n-node build: tsc + cópia de ícones)
 npm run build
+
+# Testes (compila e roda node --test sobre o dist)
+npm test
 
 # Modo watch
 npm run dev
 
-# Lint (ESLint + plugin de community nodes)
+# Lint oficial do n8n (n8n-node lint)
 npm run lint
-npm run lintfix
-
-# Formatar
-npm run format
+npm run lint:fix
 ```
 
 Estrutura resumida:
@@ -179,8 +190,9 @@ n8n-nodes-clinicorp/
 │       ├── Clinicorp.node.ts           # node de ação (Recurso → Operação)
 │       ├── actions/                    # um arquivo por recurso (operações + campos)
 │       ├── methods/                    # loadOptions (dropdowns dinâmicos)
-│       ├── helpers/                    # formatação de datas / bodies
+│       ├── helpers/                    # datas, bodies, campos guiados e versões do node
 │       └── transport/                  # cliente HTTP + resolução do Subscriber ID
+├── test/                               # node --test sobre o dist
 └── dist/                               # saída compilada (publicada)
 ```
 
@@ -188,13 +200,20 @@ n8n-nodes-clinicorp/
 
 - Requer n8n com `n8nNodesApiVersion` 1.
 - Base da API: `https://api.clinicorp.com/rest/v1`.
+- **Versão 1 ou 2 do node:** node novo nasce na versão 2 (campos guiados). Workflows salvos ficam na versão 1, com os mesmos campos da 1.1.2, e continuam funcionando sem edição.
 
 ## 📚 Recursos
 
 - [Documentação de community nodes do n8n](https://docs.n8n.io/integrations/community-nodes/)
 - [Documentação da API do Clinicorp](https://sistema.clinicorp.com/api-docs/)
 
+## 🚀 Publicação
+
+A tag `vX.Y.Z` dispara o workflow `publish.yml`, que envia a versão com `npm stage publish` e provenance. A versão **fica em espera**: ela só vai ao ar depois que o dono a aprova, com 2FA, na aba **Staged Packages** do npmjs.com. Sem a aprovação, nada muda no registro.
+
 ## 📈 Versões
+
+- **1.2.0** — **Campos guiados e lint oficial.** Node versão 2: procedimentos do agendamento em lista da conta, sexo do paciente e cor da categoria em seletores, horário `HH:mm` e IDs de agendamento e orçamento validados antes da chamada, com dica de onde achar cada ID. Toda chamada ao Clinicorp tem timeout de 30 s. Migração para o `@n8n/node-cli` 0.55.5 (lint oficial sem erros), testes e CI. Workflows salvos continuam na versão 1. Veja o `CHANGELOG.md`.
 
 - **1.1.1** — Documentação: adicionado selo do GitHub Actions no README e workflow de CI para validar lint e build.
 - **1.1.0** — **Subscriber ID sai do node e vira obrigatório na credencial.** O campo *Subscriber ID* foi removido de todas as operações; agora ele é preenchido uma única vez na credencial **Clinicorp API** (campo obrigatório) e enviado automaticamente. Menos configuração por node, e o agente de IA não consegue mais inventar o id do Assinante. Para múltiplas contas, use uma credencial por assinante.
@@ -211,6 +230,10 @@ Se algo não funcionar:
 3. Verifique se a versão do n8n é compatível.
 4. Consulte os logs do n8n para detalhes do erro.
 5. Abra uma [issue no GitHub](https://github.com/PedroHSGuimaraes/n8n-nodes-clinicorp/issues).
+
+## ☕ Apoie o projeto
+
+Este node é mantido de forma independente. Se ele ajuda suas automações, você pode apoiar o desenvolvimento, a manutenção e as novas integrações pelo [Buy Me a Coffee](https://buymeacoffee.com/qTny0AzFXS).
 
 ## 📄 Licença
 

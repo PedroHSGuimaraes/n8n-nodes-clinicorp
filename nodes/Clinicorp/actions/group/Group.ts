@@ -1,4 +1,4 @@
-import type { IExecuteFunctions, INodeProperties } from 'n8n-workflow';
+import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 
 import { clinicorpApiRequest } from '../../transport';
 
@@ -34,8 +34,7 @@ export const groupDescription: INodeProperties[] = [
 export async function executeGroup(
 	this: IExecuteFunctions,
 	operation: string,
-	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	if (operation === 'getClinicsInfo') {
 		return clinicorpApiRequest.call(this, 'GET', '/group/list_subscribers_clinics');
 	}

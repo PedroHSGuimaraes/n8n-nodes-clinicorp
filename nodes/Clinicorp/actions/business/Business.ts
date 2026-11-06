@@ -100,7 +100,7 @@ export async function executeBusiness(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	if (operation === 'getAvailableTimes') {
 		const professionalId = this.getNodeParameter('professionalId', i) as string;
 		const clinicId = this.getNodeParameter('clinicId', i) as string;

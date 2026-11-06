@@ -96,8 +96,7 @@ export const financialDescription: INodeProperties[] = [
 			},
 		},
 		typeOptions: { loadOptionsMethod: 'getClinics' },
-		description:
-			'Clinic (business) whose data will be returned (id da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Clinic (business) whose data will be returned (ID da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 
 	// ----- Optional clinic (Get Invoices, Get Receipts, Get Summary) -----
@@ -113,8 +112,7 @@ export const financialDescription: INodeProperties[] = [
 			},
 		},
 		typeOptions: { loadOptionsMethod: 'getClinics' },
-		description:
-			'Optionally restrict results to a single clinic (id de uma clínica específica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Optionally restrict results to a single clinic (ID de uma clínica específica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 
 	// ----- Get Average Installments -----
@@ -137,7 +135,7 @@ export async function executeFinancial(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	const subscriberId = await getSubscriberId.call(this, i);
 
 	if (operation === 'getAverageInstallments') {

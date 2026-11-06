@@ -9,15 +9,21 @@ on:
 permissions:
   contents: read
 
+# Cancela a execução antiga da mesma branch ou PR para não gastar minutos de CI.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    name: Build and lint
+    name: Lint, test and build
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
+      # A mesma node-version do publish.yml: Node 20 com npm 10 quebrou o `npm ci` do lock.
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -29,6 +35,10 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      # `npm test` compila antes e roda `node --test test/*.test.cjs` sobre o dist.
+      - name: Test
+        run: npm test
 
       - name: Build
         run: npm run build

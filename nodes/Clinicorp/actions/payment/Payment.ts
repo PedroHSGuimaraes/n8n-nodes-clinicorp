@@ -113,7 +113,7 @@ export async function executePayment(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	const subscriberId = await getSubscriberId.call(this, i);
 
 	if (operation === 'getHealthInsuranceClaims') {

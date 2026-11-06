@@ -2,12 +2,13 @@ import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workfl
 
 import { clinicorpApiRequest, getSubscriberId } from '../../transport';
 import { toApiDate } from '../../helpers/format';
+import { replaceOption, splitByVersion } from '../../helpers/versions';
 
 const showOnlyForPatients = {
 	resource: ['patient'],
 };
 
-export const patientDescription: INodeProperties[] = [
+const patientBaseDescription: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
@@ -98,6 +99,7 @@ export const patientDescription: INodeProperties[] = [
 				displayName: 'Email',
 				name: 'email',
 				type: 'string',
+				placeholder: 'name@email.com',
 				default: '',
 				description: 'Email address of the patient',
 			},
@@ -149,7 +151,9 @@ export const patientDescription: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		displayOptions: { show: { ...showOnlyForPatients, operation: ['get'] } },
-		description: 'Search by patient ID; leave empty to search by another field below',
+		placeholder: 'e.g. 5530119',
+		description:
+			'Search by patient ID; leave empty to search by another field below. Find the ID with Patient > Get using the name, CPF, email or phone.',
 	},
 	{
 		displayName: 'Additional Filters',
@@ -171,6 +175,7 @@ export const patientDescription: INodeProperties[] = [
 				displayName: 'Email',
 				name: 'email',
 				type: 'string',
+				placeholder: 'name@email.com',
 				default: '',
 				description: 'Search by patient email address',
 			},
@@ -230,8 +235,7 @@ export const patientDescription: INodeProperties[] = [
 		default: '',
 		displayOptions: { show: { ...showOnlyForPatients, operation: ['getEstimateTotals'] } },
 		typeOptions: { loadOptionsMethod: 'getClinics' },
-		description:
-			'Optionally restrict the totals to a single clinic (id de uma clínica específica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Optionally restrict the totals to a single clinic (ID de uma clínica específica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 
 	// ----- Get Many Appointments -----
@@ -242,15 +246,36 @@ export const patientDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForPatients, operation: ['getManyAppointments'] } },
-		description: 'Unique ID of the patient (id do paciente) whose appointments will be listed',
+		description: 'Unique ID of the patient (ID do paciente) whose appointments will be listed',
 	},
 ];
+
+/**
+ * Descrição final do recurso. Na versão 2, o Additional Fields de Create troca o sexo (texto
+ * livre) por uma lista com M e F; a versão 1 fica com os mesmos nomes e tipos da 1.1.2.
+ */
+export const patientDescription: INodeProperties[] = splitByVersion(
+	patientBaseDescription,
+	(property) =>
+		property.name === 'additionalFields' &&
+		property.displayOptions?.show?.operation?.includes('create') === true,
+	(property) =>
+		replaceOption(property, 'sex', {
+			type: 'options',
+			options: [
+				{ name: 'Female', value: 'F' },
+				{ name: 'Male', value: 'M' },
+			],
+			default: 'F',
+			description: 'Patient sex as expected by Clinicorp',
+		}),
+);
 
 export async function executePatient(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	if (operation === 'create') {
 		const subscriberId = await getSubscriberId.call(this, i);
 		const name = this.getNodeParameter('name', i) as string;

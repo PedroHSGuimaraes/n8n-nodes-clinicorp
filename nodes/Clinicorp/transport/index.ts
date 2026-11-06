@@ -10,6 +10,13 @@ import { NodeApiError, NodeOperationError } from 'n8n-workflow';
 
 export const CLINICORP_BASE_URL = 'https://api.clinicorp.com/rest/v1';
 
+/**
+ * Tempo máximo, em milissegundos, que o node espera pela Clinicorp (30 segundos).
+ * Sem limite, uma Clinicorp travada prenderia a execução do n8n. O valor fica acima do tempo
+ * esperado de uma API de gestão clínica; a doc não publica um limite próprio (premissa do plano).
+ */
+export const CLINICORP_TIMEOUT_MS = 30000;
+
 type ClinicorpContext = IExecuteFunctions | ILoadOptionsFunctions;
 
 /**
@@ -22,7 +29,7 @@ export async function clinicorpApiRequest(
 	endpoint: string,
 	body: IDataObject | IDataObject[] = {},
 	qs: IDataObject = {},
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	const options: IHttpRequestOptions = {
 		method,
 		baseURL: CLINICORP_BASE_URL,
@@ -30,6 +37,7 @@ export async function clinicorpApiRequest(
 		qs,
 		body,
 		json: true,
+		timeout: CLINICORP_TIMEOUT_MS,
 	};
 
 	const hasBody = Array.isArray(body) ? body.length > 0 : Object.keys(body).length > 0;

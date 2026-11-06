@@ -1,4 +1,4 @@
-import type { ILoadOptionsFunctions, INodePropertyOptions } from 'n8n-workflow';
+import type { IDataObject, ILoadOptionsFunctions, INodePropertyOptions } from 'n8n-workflow';
 
 import { clinicorpApiRequest } from '../transport';
 
@@ -6,8 +6,14 @@ import { clinicorpApiRequest } from '../transport';
  * Map an array of Clinicorp records into n8n dropdown options.
  * Clinicorp uses mixed casing, so we probe several common label keys.
  */
-function toOptions(items: any[], labelKeys: string[]): INodePropertyOptions[] {
-	return (items ?? [])
+function toOptions(
+	response: IDataObject | IDataObject[],
+	labelKeys: string[],
+): INodePropertyOptions[] {
+	// A Clinicorp devolve lista nas rotas de listagem; qualquer outro formato vira lista vazia
+	// para o seletor não quebrar o editor do n8n.
+	const items = Array.isArray(response) ? response : [];
+	return items
 		.filter(Boolean)
 		.map((item) => {
 			const label =
@@ -94,6 +100,15 @@ export const loadOptions = {
 
 	async getProcedures(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 		const items = await clinicorpApiRequest.call(this, 'GET', '/procedures/list');
-		return toOptions(items, ['ProcedureName', 'Description', 'name']);
+		// A API de agendamento recebe o NOME do procedimento (texto), não o ID; por isso o valor
+		// do seletor é o próprio nome. Item sem `id` entra (o nome basta) e nome repetido aparece
+		// uma vez só, para a pessoa não ver duas opções iguais.
+		const list = Array.isArray(items) ? items : [];
+		const names = list
+			.map((item) => String(item.ProcedureName ?? item.Description ?? item.name ?? '').trim())
+			.filter(Boolean);
+		return [...new Set(names)]
+			.sort((a, b) => a.localeCompare(b))
+			.map((name) => ({ name, value: name }));
 	},
 };

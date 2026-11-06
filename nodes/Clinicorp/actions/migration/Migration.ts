@@ -137,7 +137,7 @@ export async function executeMigration(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	if (operation === 'createFromConnection') {
 		const subscriberId = await getSubscriberId.call(this, i);
 		const databaseType = this.getNodeParameter('connDatabaseType', i) as string;

@@ -2,12 +2,14 @@ import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workfl
 
 import { clinicorpApiRequest, getSubscriberId } from '../../transport';
 import { toApiDate, pickMapped } from '../../helpers/format';
+import { checkTime, normalizeProcedures, readRequiredId } from '../../helpers/guided';
+import { replaceOption, splitByVersion } from '../../helpers/versions';
 
 const showOnlyForAppointments = {
 	resource: ['appointment'],
 };
 
-export const appointmentDescription: INodeProperties[] = [
+const appointmentBaseDescription: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
@@ -118,7 +120,9 @@ export const appointmentDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['cancel'] } },
-		description: 'Unique ID of the appointment (id do agendamento) to cancel',
+		placeholder: 'e.g. 4817203',
+		description:
+			'Unique ID of the appointment (ID do agendamento) to cancel. Find it with Appointment > Get Many.',
 	},
 
 	// ----- Change Status -----
@@ -129,8 +133,9 @@ export const appointmentDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['changeStatus'] } },
+		placeholder: 'e.g. 4817203',
 		description:
-			'ID of the appointment to update. To update several appointments at once, send comma-separated IDs like 1,2,3.',
+			'ID of the appointment to update. Find it with Appointment > Get Many. To update several appointments at once, send comma-separated IDs like 1,2,3.',
 	},
 	{
 		displayName: 'Status Name or ID',
@@ -152,7 +157,9 @@ export const appointmentDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['confirm'] } },
-		description: 'Unique ID of the appointment (id do agendamento) to confirm',
+		placeholder: 'e.g. 4817203',
+		description:
+			'Unique ID of the appointment (ID do agendamento) to confirm. Find it with Appointment > Get Many.',
 	},
 
 	// ----- Create -----
@@ -202,8 +209,7 @@ export const appointmentDescription: INodeProperties[] = [
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['create'] } },
 		typeOptions: { loadOptionsMethod: 'getClinics' },
-		description:
-			'Clinic where the appointment will be created (id da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Clinic where the appointment will be created (ID da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: 'Professional Name or ID',
@@ -213,8 +219,7 @@ export const appointmentDescription: INodeProperties[] = [
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['create'] } },
 		typeOptions: { loadOptionsMethod: 'getProfessionals' },
-		description:
-			'Professional who will attend the appointment (id do profissional). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Professional who will attend the appointment (ID do profissional). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -227,6 +232,8 @@ export const appointmentDescription: INodeProperties[] = [
 			{
 				displayName: 'Category Color',
 				name: 'categoryColor',
+				// A versão 1 guarda este campo como texto; o tipo `color` só vale na versão 2 (ver abaixo).
+				// eslint-disable-next-line n8n-nodes-base/node-param-color-type-unused
 				type: 'string',
 				default: '',
 				description:
@@ -243,6 +250,7 @@ export const appointmentDescription: INodeProperties[] = [
 				displayName: 'Email',
 				name: 'email',
 				type: 'string',
+				placeholder: 'name@email.com',
 				default: '',
 				description: 'Email address of the patient',
 			},
@@ -259,8 +267,7 @@ export const appointmentDescription: INodeProperties[] = [
 				name: 'patientPersonId',
 				type: 'string',
 				default: '',
-				description:
-					'Existing patient person ID (id da pessoa) to link the appointment to. Find it with the Patient > Get operation. Leave empty to book using only the patient name.',
+				description: 'Existing patient person ID (ID da pessoa) to link the appointment to. Find it with the Patient > Get operation. Leave empty to book using only the patient name.',
 			},
 			{
 				displayName: 'Procedures',
@@ -315,8 +322,7 @@ export const appointmentDescription: INodeProperties[] = [
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['createOnlineScheduling'] } },
 		typeOptions: { loadOptionsMethod: 'getClinics' },
-		description:
-			'Clinic for the online scheduling request (id da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Clinic for the online scheduling request (ID da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: 'Professional Name or ID',
@@ -325,8 +331,7 @@ export const appointmentDescription: INodeProperties[] = [
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['createOnlineScheduling'] } },
 		typeOptions: { loadOptionsMethod: 'getProfessionals' },
-		description:
-			'Professional requested for the online scheduling (id do profissional). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Professional requested for the online scheduling (ID do profissional). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -355,6 +360,7 @@ export const appointmentDescription: INodeProperties[] = [
 				displayName: 'Email',
 				name: 'email',
 				type: 'string',
+				placeholder: 'name@email.com',
 				default: '',
 				description: 'Email address of the patient',
 			},
@@ -443,7 +449,9 @@ export const appointmentDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['get'] } },
-		description: 'Unique ID of the appointment (id do agendamento) to retrieve',
+		placeholder: 'e.g. 4817203',
+		description:
+			'Unique ID of the appointment (ID do agendamento) to retrieve. Find it with Appointment > Get Many.',
 	},
 
 	// ----- Get Available Days -----
@@ -555,8 +563,7 @@ export const appointmentDescription: INodeProperties[] = [
 				type: 'options',
 				default: '',
 				typeOptions: { loadOptionsMethod: 'getClinics' },
-				description:
-					'Optionally restrict results to a single clinic (id da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				description: 'Optionally restrict results to a single clinic (ID da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 			{
 				displayName: 'Group By',
@@ -602,8 +609,7 @@ export const appointmentDescription: INodeProperties[] = [
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['getMany'] } },
 		typeOptions: { loadOptionsMethod: 'getClinics' },
-		description:
-			'Clinic whose appointments should be listed (id da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Clinic whose appointments should be listed (ID da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -625,7 +631,7 @@ export const appointmentDescription: INodeProperties[] = [
 				name: 'patientId',
 				type: 'string',
 				default: '',
-				description: 'Restrict results to the appointments of a single patient (id do paciente)',
+				description: 'Restrict results to the appointments of a single patient (ID do paciente)',
 			},
 		],
 	},
@@ -678,21 +684,44 @@ export const appointmentDescription: INodeProperties[] = [
 				type: 'options',
 				default: '',
 				typeOptions: { loadOptionsMethod: 'getClinics' },
-				description:
-					'Optionally restrict results to a single clinic (id da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				description: 'Optionally restrict results to a single clinic (ID da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 		],
 	},
 ];
 
+/**
+ * Descrição final do recurso. Na versão 2, o Additional Fields de Create troca os procedimentos
+ * (texto livre) por uma lista da conta e a cor da categoria por um seletor de cor; a versão 1 fica
+ * com os mesmos nomes e tipos da 1.1.2.
+ */
+export const appointmentDescription: INodeProperties[] = splitByVersion(
+	appointmentBaseDescription,
+	(property) =>
+		property.name === 'additionalFields' &&
+		property.displayOptions?.show?.operation?.includes('create') === true,
+	(property) =>
+		replaceOption(
+			replaceOption(property, 'procedures', {
+				type: 'multiOptions',
+				typeOptions: { loadOptionsMethod: 'getProcedures' },
+				default: [],
+				description:
+					'Procedures associated with the appointment. Choose from the list, or specify names using an <a href="https://docs.n8n.io/code/expressions/">expression</a>. They are sent to Clinicorp separated by commas, so a procedure name that contains a comma is not supported.',
+			}),
+			'categoryColor',
+			{ type: 'color' },
+		),
+);
+
 export async function executeAppointment(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	if (operation === 'cancel') {
 		const subscriberId = await getSubscriberId.call(this, i);
-		const id = this.getNodeParameter('cancelId', i) as string;
+		const id = readRequiredId.call(this, 'cancelId', 'Appointment ID', 'Appointment > Get Many', i);
 		return clinicorpApiRequest.call(this, 'POST', '/appointment/cancel_appointment', {
 			subscriber_id: subscriberId,
 			id,
@@ -700,7 +729,13 @@ export async function executeAppointment(
 	}
 
 	if (operation === 'changeStatus') {
-		const id = this.getNodeParameter('changeStatusId', i) as string;
+		const id = readRequiredId.call(
+			this,
+			'changeStatusId',
+			'Appointment ID',
+			'Appointment > Get Many',
+			i,
+		);
 		const statusId = this.getNodeParameter('statusId', i) as string;
 		return clinicorpApiRequest.call(
 			this,
@@ -716,7 +751,7 @@ export async function executeAppointment(
 
 	if (operation === 'confirm') {
 		const subscriberId = await getSubscriberId.call(this, i);
-		const id = this.getNodeParameter('confirmId', i) as string;
+		const id = readRequiredId.call(this, 'confirmId', 'Appointment ID', 'Appointment > Get Many', i);
 		return clinicorpApiRequest.call(this, 'POST', '/appointment/confirm_appointment', {
 			subscriber_id: subscriberId,
 			id,
@@ -724,13 +759,18 @@ export async function executeAppointment(
 	}
 
 	if (operation === 'create') {
-		const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IDataObject;
+		// Na versão 2 os procedimentos chegam como lista; viram o texto que a API espera.
+		const additionalFields = normalizeProcedures(
+			this,
+			this.getNodeParameter('additionalFields', i, {}) as IDataObject,
+		);
 
 		const body: IDataObject = {
 			PatientName: this.getNodeParameter('patientName', i) as string,
 			date: toApiDate(this.getNodeParameter('createDate', i) as string),
-			fromTime: this.getNodeParameter('fromTime', i) as string,
-			toTime: this.getNodeParameter('toTime', i) as string,
+			// Os dois horários são obrigatórios no Create: na versão 2, vazio também é recusado.
+			fromTime: checkTime.call(this, this.getNodeParameter('fromTime', i) as string, 'From Time', i, true),
+			toTime: checkTime.call(this, this.getNodeParameter('toTime', i) as string, 'To Time', i, true),
 			Clinic_BusinessId: this.getNodeParameter('createClinicId', i) as string,
 			Dentist_PersonId: this.getNodeParameter('createDentistId', i) as string,
 		};
@@ -754,6 +794,9 @@ export async function executeAppointment(
 
 	if (operation === 'createOnlineScheduling') {
 		const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IDataObject;
+		// Os horários opcionais também são validados na versão 2 antes de a requisição sair.
+		checkTime.call(this, additionalFields.fromTime as string, 'From Time', i);
+		checkTime.call(this, additionalFields.toTime as string, 'To Time', i);
 
 		const body: IDataObject = {
 			PatientName: this.getNodeParameter('onlinePatientName', i) as string,
@@ -789,7 +832,7 @@ export async function executeAppointment(
 	if (operation === 'get') {
 		const subscriberId = await getSubscriberId.call(this, i);
 		const codeLink = this.getNodeParameter('getCodeLink', i) as string;
-		const id = this.getNodeParameter('getId', i) as string;
+		const id = readRequiredId.call(this, 'getId', 'Appointment ID', 'Appointment > Get Many', i);
 		return clinicorpApiRequest.call(
 			this,
 			'GET',
