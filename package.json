@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-clinicorp",
-	"version": "1.1.2",
+	"version": "1.2.0",
 	"description": "n8n community node for Clinicorp (dental & clinic management SaaS): estimates, patients, appointments, financial, payments, sales, procedures, professionals, clinics, CRM leads, analytics and more. Usable as an AI Agent tool.",
 	"keywords": [
 		"n8n-community-node-package",
@@ -27,6 +27,10 @@
 	"bugs": {
 		"url": "https://github.com/PedroHSGuimaraes/n8n-nodes-clinicorp/issues"
 	},
+	"funding": {
+		"type": "individual",
+		"url": "https://buymeacoffee.com/qTny0AzFXS"
+	},
 	"main": "dist/nodes/Clinicorp/Clinicorp.node.js",
 	"scripts": {
 		"build": "n8n-node build",
@@ -35,7 +39,8 @@
 		"lint": "n8n-node lint",
 		"lint:fix": "n8n-node lint --fix",
 		"test": "npm run build && node --test test/*.test.cjs",
-		"release": "n8n-node release"
+		"release": "n8n-node release",
+		"prepublishOnly": "n8n-node prerelease"
 	},
 	"files": [
 		"dist"
