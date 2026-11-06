@@ -101,10 +101,14 @@ export const loadOptions = {
 	async getProcedures(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 		const items = await clinicorpApiRequest.call(this, 'GET', '/procedures/list');
 		// A API de agendamento recebe o NOME do procedimento (texto), não o ID; por isso o valor
-		// do seletor é o próprio nome.
-		return toOptions(items, ['ProcedureName', 'Description', 'name']).map((option) => ({
-			name: option.name,
-			value: option.name,
-		}));
+		// do seletor é o próprio nome. Item sem `id` entra (o nome basta) e nome repetido aparece
+		// uma vez só, para a pessoa não ver duas opções iguais.
+		const list = Array.isArray(items) ? items : [];
+		const names = list
+			.map((item) => String(item.ProcedureName ?? item.Description ?? item.name ?? '').trim())
+			.filter(Boolean);
+		return [...new Set(names)]
+			.sort((a, b) => a.localeCompare(b))
+			.map((name) => ({ name, value: name }));
 	},
 };

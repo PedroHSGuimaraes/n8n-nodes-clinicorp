@@ -24,10 +24,17 @@ function maiorOuIgual(versao, minima) {
 	return true;
 }
 
-// Extrai a node-version de um workflow; o valor pode vir com aspas.
-function nodeVersion(arquivo) {
-	const achou = ler(arquivo).match(/node-version:\s*['"]?([^\s'"]+)/);
-	return achou ? achou[1] : undefined;
+// Lê um workflow sem as linhas de comentário, para um comando só comentado não contar como passo.
+function workflow(arquivo) {
+	return ler(arquivo)
+		.split('\n')
+		.filter((linha) => !linha.trim().startsWith('#'))
+		.join('\n');
+}
+
+// Lista todas as node-version de um workflow; o valor pode vir com aspas.
+function nodeVersions(arquivo) {
+	return [...workflow(arquivo).matchAll(/node-version:\s*['"]?([^\s'"]+)/g)].map((m) => m[1]);
 }
 
 describe('S1 toolchain do node-cli', () => {
@@ -63,15 +70,19 @@ describe('S1 toolchain do node-cli', () => {
 	});
 
 	it('npm test compila e roda os testes', () => {
-		assert.match(pkg.scripts.test, /npm run build/);
-		assert.match(pkg.scripts.test, /node --test test\/\*\.test\.cjs/);
+		// O script compila primeiro e só então roda os testes, nesta ordem e ligados por &&.
+		assert.equal(pkg.scripts.test, 'npm run build && node --test test/*.test.cjs');
 	});
 
 	it('ci.yml roda ci, lint, test e build com a node-version do publish', () => {
-		const ci = ler('.github/workflows/ci.yml');
+		const ci = workflow('.github/workflows/ci.yml');
+		// Cada comando precisa ser o `run:` de um passo, não só aparecer no texto.
 		for (const comando of ['npm ci', 'npm run lint', 'npm test', 'npm run build']) {
-			assert.ok(ci.includes(comando), `ci.yml sem ${comando}`);
+			assert.match(ci, new RegExp(`^\\s*run: ${comando}$`, 'm'), `ci.yml sem passo ${comando}`);
 		}
-		assert.equal(nodeVersion('.github/workflows/ci.yml'), nodeVersion('.github/workflows/publish.yml'));
+		const doCi = nodeVersions('.github/workflows/ci.yml');
+		const doPublish = nodeVersions('.github/workflows/publish.yml');
+		assert.ok(doCi.length > 0);
+		assert.deepEqual(new Set(doCi), new Set(doPublish));
 	});
 });

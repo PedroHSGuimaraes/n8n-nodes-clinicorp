@@ -89,13 +89,22 @@ describe('S2 versão 1 continua igual', () => {
 	});
 
 	it('v1 mantém name e type de todo parâmetro da 1.1.2', () => {
-		// A fixture guarda "contexto|name|type" de cada parâmetro e opção da 1.1.2.
+		// A fixture guarda "contexto|caminho|tipo|req" de cada parâmetro, opção de coleção e campo
+		// de fixedCollection da 1.1.2. A mesma regra monta as chaves da versão 1 atual.
 		const atuais = new Set();
-		for (const p of new Clinicorp().description.properties.filter(valeParaVersao1)) {
-			atuais.add([contextoDe(p), p.name, p.type].join('|'));
-			for (const o of p.options || []) {
-				if (o.name && o.type) atuais.add([contextoDe(p), `${p.name}.${o.name}`, o.type].join('|'));
+		const descer = (contexto, caminho, nos) => {
+			for (const no of nos) {
+				if (!no.name || !no.type) continue;
+				const atual = caminho ? `${caminho}.${no.name}` : no.name;
+				atuais.add([contexto, atual, no.type, no.required ? 'req' : 'opt'].join('|'));
+				for (const opcao of no.options || []) {
+					if (opcao.values) descer(contexto, `${atual}.${opcao.name}`, opcao.values);
+					else if (opcao.name && opcao.type) descer(contexto, atual, [opcao]);
+				}
 			}
+		};
+		for (const p of new Clinicorp().description.properties.filter(valeParaVersao1)) {
+			descer(contextoDe(p), '', [p]);
 		}
 		const faltando = chavesDaVersao1.filter((chave) => !atuais.has(chave));
 		assert.deepEqual(faltando, []);
@@ -140,6 +149,22 @@ describe('S3 campos guiados na versão 2', () => {
 		});
 		assert.equal(dois.contexto.requisicoes[0].body.Procedures, 'Limpeza, Restauração');
 
+		// Espaço nas pontas sai e item vazio some; lista só de vazios some do corpo.
+		const sujos = await executar({
+			recurso: 'appointment',
+			operacao: 'create',
+			parametros: corpoDeCriarAgendamento({ procedures: ['  Limpeza  ', ' ', 'Restauração'] }),
+			typeVersion: 2,
+		});
+		assert.equal(sujos.contexto.requisicoes[0].body.Procedures, 'Limpeza, Restauração');
+		const soVazios = await executar({
+			recurso: 'appointment',
+			operacao: 'create',
+			parametros: corpoDeCriarAgendamento({ procedures: [' '] }),
+			typeVersion: 2,
+		});
+		assert.equal('Procedures' in soVazios.contexto.requisicoes[0].body, false);
+
 		const nenhum = await executar({
 			recurso: 'appointment',
 			operacao: 'create',
@@ -159,6 +184,16 @@ describe('S3 campos guiados na versão 2', () => {
 		assert.deepEqual(opcoes, [
 			{ name: 'Limpeza', value: 'Limpeza' },
 			{ name: 'Restauração', value: 'Restauração' },
+		]);
+	});
+
+	it('getProcedures aceita item sem id e não repete nome', async () => {
+		const contexto = criarContexto({
+			resposta: [{ ProcedureName: 'Z' }, { id: 7, ProcedureName: 'A' }, { id: 8, ProcedureName: 'A' }],
+		});
+		assert.deepEqual(await loadOptions.getProcedures.call(contexto), [
+			{ name: 'A', value: 'A' },
+			{ name: 'Z', value: 'Z' },
 		]);
 	});
 
@@ -193,6 +228,24 @@ describe('S3 campos guiados na versão 2', () => {
 			});
 		}
 
+		it('Create recusa To Time inválido e horário obrigatório vazio', async () => {
+			for (const [campo, valor, rotulo] of [
+				['toTime', '25:00', 'To Time'],
+				['toTime', '', 'To Time'],
+				['fromTime', '', 'From Time'],
+			]) {
+				await assert.rejects(
+					executar({
+						recurso: 'appointment',
+						operacao: 'create',
+						parametros: { ...corpoDeCriarAgendamento({}), [campo]: valor },
+						typeVersion: 2,
+					}),
+					new RegExp(`'${rotulo}' parameter must use the 24-hour format HH:mm \\[item 0\\]`),
+				);
+			}
+		});
+
 		it('Create Online Scheduling também valida To Time', async () => {
 			const chamada = executar({
 				recurso: 'appointment',
@@ -209,33 +262,44 @@ describe('S3 campos guiados na versão 2', () => {
 	});
 
 	describe('v2 valida ID obrigatório antes da requisição', () => {
+		// recurso, operação, parâmetro, rótulo, origem dita ao usuário, rota e onde o ID viaja.
 		const casos = [
-			['appointment', 'cancel', 'cancelId', 'Appointment ID', '/appointment/cancel_appointment'],
-			['appointment', 'confirm', 'confirmId', 'Appointment ID', '/appointment/confirm_appointment'],
-			['appointment', 'changeStatus', 'changeStatusId', 'Appointment ID', '/appointment/change_status'],
-			['estimate', 'get', 'treatmentId', 'Treatment ID', '/estimates/get'],
+			['appointment', 'cancel', 'cancelId', 'Appointment ID', 'Appointment > Get Many', '/appointment/cancel_appointment', 'body.id'],
+			['appointment', 'confirm', 'confirmId', 'Appointment ID', 'Appointment > Get Many', '/appointment/confirm_appointment', 'body.id'],
+			['appointment', 'changeStatus', 'changeStatusId', 'Appointment ID', 'Appointment > Get Many', '/appointment/change_status', 'qs.id'],
+			['appointment', 'get', 'getId', 'Appointment ID', 'Appointment > Get Many', '/appointment/get_appointment', 'qs.id'],
+			['estimate', 'get', 'treatmentId', 'Treatment ID', 'Estimate > Get Many', '/estimates/get', 'qs.treatment_id'],
 		];
-		for (const [recurso, operacao, parametro, rotulo, rota] of casos) {
+		for (const [recurso, operacao, parametro, rotulo, origem, rota, caminhoDoId] of casos) {
 			it(`${recurso} ${operacao}: vazio é recusado e espaço das pontas sai`, async () => {
 				for (const vazio of ['', '   ']) {
 					await assert.rejects(
-						executar({ recurso, operacao, parametros: { [parametro]: vazio, statusId: 's1' }, typeVersion: 2 }),
+						executar({
+							recurso,
+							operacao,
+							parametros: { [parametro]: vazio, statusId: 's1', getCodeLink: 'abc' },
+							typeVersion: 2,
+						}),
 						(erro) => {
 							assert.equal(erro.message, `The '${rotulo}' parameter is empty [item 0]`);
-							assert.match(erro.description, /Get Many|Get/);
+							assert.equal(erro.description, `Get the ID from ${origem}`);
 							return true;
 						},
 					);
 				}
-				const { contexto } = await executar({
-					recurso,
-					operacao,
-					parametros: { [parametro]: ' x1 ', statusId: 's1' },
-					typeVersion: 2,
-				});
-				assert.equal(contexto.requisicoes[0].url, rota);
-				const enviado = { ...contexto.requisicoes[0].body, ...contexto.requisicoes[0].qs };
-				assert.ok(Object.values(enviado).includes('x1'), 'o ID enviado deve vir sem espaço nas pontas');
+				// Texto com espaços nas pontas e ID numérico (expressão como {{ $json.id }}).
+				for (const [entrada, esperado] of [[' x1 ', 'x1'], [12345, '12345'], [0, '0']]) {
+					const { contexto } = await executar({
+						recurso,
+						operacao,
+						parametros: { [parametro]: entrada, statusId: 's1', getCodeLink: 'abc' },
+						typeVersion: 2,
+					});
+					const requisicao = contexto.requisicoes[0];
+					assert.equal(requisicao.url, rota);
+					const [origemDoCampo, chave] = caminhoDoId.split('.');
+					assert.equal(requisicao[origemDoCampo === 'body' ? 'body' : 'qs'][chave], esperado);
+				}
 			});
 		}
 	});
@@ -245,6 +309,7 @@ describe('S3 campos guiados na versão 2', () => {
 			cancelId: /Appointment > Get Many/,
 			confirmId: /Appointment > Get Many/,
 			changeStatusId: /Appointment > Get Many/,
+			getId: /Appointment > Get Many/,
 			treatmentId: /Estimate > Get Many/,
 			patientId: /Patient > Get/,
 		};

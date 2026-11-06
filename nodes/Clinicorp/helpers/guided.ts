@@ -39,7 +39,9 @@ export function readRequiredId(
 	const value = this.getNodeParameter(name, i) as string;
 	if (!usesGuidedFields(this)) return value;
 
-	const id = (value ?? '').trim();
+	// O ID pode chegar como número (expressão como {{ $json.id }}); String() evita o erro de
+	// `trim` em número e o ID `0` continua valendo, pois só o texto vazio é recusado.
+	const id = String(value ?? '').trim();
 	if (id) return id;
 
 	throw new NodeOperationError(this.getNode(), `The '${label}' parameter is empty [item ${i}]`, {
@@ -50,11 +52,18 @@ export function readRequiredId(
 
 /**
  * Valida um horário no formato HH:mm (24 horas) na versão 2.
- * Valor vazio passa: nos campos opcionais ele significa "não enviar".
+ * Nos campos opcionais o valor vazio passa, pois significa "não enviar"; nos obrigatórios
+ * (`required` verdadeiro) o vazio também é recusado.
  * Na versão 1 não valida nada, para manter o comportamento da 1.1.2.
  */
-export function checkTime(this: IExecuteFunctions, value: string, label: string, i: number): string {
-	if (!usesGuidedFields(this) || !value) return value;
+export function checkTime(
+	this: IExecuteFunctions,
+	value: string,
+	label: string,
+	i: number,
+	required = false,
+): string {
+	if (!usesGuidedFields(this) || (!value && !required)) return value;
 	if (TIME_24H.test(value)) return value;
 
 	throw new NodeOperationError(
@@ -74,6 +83,7 @@ export function normalizeProcedures(context: IExecuteFunctions, fields: IDataObj
 	if (!usesGuidedFields(context) || !Array.isArray(fields.procedures)) return fields;
 
 	const { procedures, ...rest } = fields;
-	const names = (procedures as string[]).filter(Boolean);
+	// Tira o espaço das pontas e descarta item vazio, para não enviar `" "` à API.
+	const names = (procedures as string[]).map((name) => String(name).trim()).filter(Boolean);
 	return names.length ? { ...rest, procedures: names.join(', ') } : rest;
 }

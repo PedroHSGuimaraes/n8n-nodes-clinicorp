@@ -50,10 +50,10 @@ Proof: run unit | ✔ v2 junta procedimentos com vírgula e omite quando vazio
 **C12** - `getProcedures` chama `GET /procedures/list` uma vez e devolve nome nos dois campos, ordenado (AC S3.5)
 Proof: run unit | ✔ getProcedures lista e ordena por nome
 
-**C13** - v2 recusa horário fora de `HH:mm` antes de qualquer requisição, em Create e em Create Online Scheduling (AC S3.6)
+**C13** - v2 recusa horário fora de `HH:mm` (e vazio no Create) antes de qualquer requisição, em Create e em Create Online Scheduling (AC S3.6)
 Proof: run unit | ✔ v2 valida horário HH:mm antes da requisição
 
-**C14** - v2 recusa ID vazio ou só com espaços de agendamento e orçamento antes de qualquer requisição e remove espaço das pontas (AC S3.7)
+**C14** - v2 recusa ID vazio ou só com espaços de agendamento e orçamento antes de qualquer requisição, remove espaço das pontas e aceita ID numérico (AC S3.7)
 Proof: run unit | ✔ v2 valida ID obrigatório antes da requisição
 
 **C15** - IDs de paciente, agendamento e orçamento da v2 têm `placeholder` e `description` que dizem a operação de origem (AC S3.8)
@@ -96,8 +96,8 @@ Proof: walk - o dono aprova a versão com 2FA no npmjs.com e roda `npm view n8n-
 | Landing: versão do pacote (1) | C19 | - |
 | Landing: timeout (1) | C16 | - |
 | horários válidos e inválidos (6) | `14:00` C13 · `00:00` C13 · `23:59` C13 · `24:00` C13 · `9h` C13 · `9:5` C13 | - |
-| IDs obrigatórios validados (4) | cancel C14 · confirm C14 · changeStatus C14 · estimate get C14 | - |
-| campos de ID com dica (5) | C15, table-driven over all 5 | - |
+| IDs obrigatórios validados (5) | cancel C14 · confirm C14 · changeStatus C14 · appointment get C14 · estimate get C14 | - |
+| campos de ID com dica (6) | C15, table-driven over all 6 | - |
 | seções do README (16) | C20, table-driven over all 16 | - |
 
 ## Swept

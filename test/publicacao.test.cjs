@@ -20,7 +20,13 @@ describe('S5 lançamento 1.2.0', () => {
 		});
 		// Sem esse script o npm publicaria sem a checagem do n8n-node prerelease.
 		assert.equal(pkg.scripts.prepublishOnly, 'n8n-node prerelease');
-		assert.match(ler('CHANGELOG.md'), /^## 1\.2\.0\b/m);
+		const changelog = ler('CHANGELOG.md');
+		assert.match(changelog, /^## 1\.2\.0\b/m);
+		// A seção da 1.2.0 lista os cinco assuntos que a claim cita.
+		const secao = changelog.split(/^## /m).find((s) => s.startsWith('1.2.0'));
+		for (const assunto of ['versão 2', 'Versão 1', 'Timeout', 'Toolchain', 'Publicação']) {
+			assert.ok(secao.includes(assunto), `CHANGELOG 1.2.0 sem "${assunto}"`);
+		}
 	});
 
 	it('README segue o padrão completo', () => {
@@ -58,10 +64,16 @@ describe('S5 lançamento 1.2.0', () => {
 	});
 
 	it('publish.yml publica por stage com RELEASE_MODE', () => {
-		const publish = ler('.github/workflows/publish.yml');
-		assert.ok(publish.includes('npx -y npm@12.2.2 stage publish --provenance --access public'));
-		assert.match(publish, /RELEASE_MODE: 'true'/);
-		assert.ok(publish.includes('NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}'));
+		// Sem as linhas de comentário: o comando só comentado não conta como passo.
+		const publish = ler('.github/workflows/publish.yml')
+			.split('\n')
+			.filter((linha) => !linha.trim().startsWith('#'))
+			.join('\n');
+		// O passo de publicação inteiro: comando, RELEASE_MODE e token no mesmo bloco `env`.
+		assert.match(
+			publish,
+			/run: npx -y npm@12\.2\.2 stage publish --provenance --access public\n\s+env:\n\s+RELEASE_MODE: 'true'\n\s+NODE_AUTH_TOKEN: \$\{\{ secrets\.NPM_TOKEN \}\}/,
+		);
 		assert.match(publish, /^\s*workflow_dispatch:/m);
 		// Publicar só quando a tag bate com a versão do package.json.
 		assert.ok(publish.includes('v${PACKAGE_VERSION}'));

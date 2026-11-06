@@ -110,7 +110,7 @@ Em node novo, procedimentos e sexo são listas, e horário e ID têm dica e vali
 5. WHEN o editor pede `getProcedures` THEN o sistema SHALL chamar `GET /procedures/list` uma vez e devolver `{ name, value }` com o nome do procedimento nos dois campos, ordenado por nome
 6. IF `fromTime` ou `toTime` na versão 2 não casa com `HH:mm` de 00:00 a 23:59 THEN o sistema SHALL lançar `NodeOperationError` antes de qualquer requisição, com a mensagem `The 'From Time' parameter must use the 24-hour format HH:mm [item 0]`
    - `14:00` → aceito; `00:00` → aceito; `23:59` → aceito; `24:00` → erro; `9h` → erro; `9:5` → erro
-7. IF um ID obrigatório de agendamento (Cancel, Confirm, Change Status) ou de orçamento (Get) chega vazio ou só com espaços na versão 2 THEN o sistema SHALL lançar `NodeOperationError` antes de qualquer requisição, com a descrição que diz de qual operação sai o ID
+7. IF um ID obrigatório de agendamento (Cancel, Confirm, Change Status, Get) ou de orçamento (Get) chega vazio ou só com espaços na versão 2 THEN o sistema SHALL lançar `NodeOperationError` antes de qualquer requisição, com a descrição que diz de qual operação sai o ID
    - `' p1 '` → envia `p1` (espaço das pontas removido); `''` → erro; `'   '` → erro
 8. The node SHALL ter, em cada campo de ID de paciente, agendamento e orçamento da versão 2, um `placeholder` e uma `description` que dizem de qual operação o ID sai (Patient > Get, Appointment > Get Many, Estimate > Get Many)
 

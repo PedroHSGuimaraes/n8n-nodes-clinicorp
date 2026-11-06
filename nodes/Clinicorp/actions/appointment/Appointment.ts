@@ -449,7 +449,9 @@ const appointmentBaseDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['get'] } },
-		description: 'Unique ID of the appointment (ID do agendamento) to retrieve',
+		placeholder: 'e.g. 4817203',
+		description:
+			'Unique ID of the appointment (ID do agendamento) to retrieve. Find it with Appointment > Get Many.',
 	},
 
 	// ----- Get Available Days -----
@@ -705,7 +707,7 @@ export const appointmentDescription: INodeProperties[] = splitByVersion(
 				typeOptions: { loadOptionsMethod: 'getProcedures' },
 				default: [],
 				description:
-					'Procedures associated with the appointment. Choose from the list, or specify names using an <a href="https://docs.n8n.io/code/expressions/">expression</a>. They are sent to Clinicorp separated by commas.',
+					'Procedures associated with the appointment. Choose from the list, or specify names using an <a href="https://docs.n8n.io/code/expressions/">expression</a>. They are sent to Clinicorp separated by commas, so a procedure name that contains a comma is not supported.',
 			}),
 			'categoryColor',
 			{ type: 'color' },
@@ -766,8 +768,9 @@ export async function executeAppointment(
 		const body: IDataObject = {
 			PatientName: this.getNodeParameter('patientName', i) as string,
 			date: toApiDate(this.getNodeParameter('createDate', i) as string),
-			fromTime: checkTime.call(this, this.getNodeParameter('fromTime', i) as string, 'From Time', i),
-			toTime: checkTime.call(this, this.getNodeParameter('toTime', i) as string, 'To Time', i),
+			// Os dois horários são obrigatórios no Create: na versão 2, vazio também é recusado.
+			fromTime: checkTime.call(this, this.getNodeParameter('fromTime', i) as string, 'From Time', i, true),
+			toTime: checkTime.call(this, this.getNodeParameter('toTime', i) as string, 'To Time', i, true),
 			Clinic_BusinessId: this.getNodeParameter('createClinicId', i) as string,
 			Dentist_PersonId: this.getNodeParameter('createDentistId', i) as string,
 		};
@@ -829,7 +832,7 @@ export async function executeAppointment(
 	if (operation === 'get') {
 		const subscriberId = await getSubscriberId.call(this, i);
 		const codeLink = this.getNodeParameter('getCodeLink', i) as string;
-		const id = this.getNodeParameter('getId', i) as string;
+		const id = readRequiredId.call(this, 'getId', 'Appointment ID', 'Appointment > Get Many', i);
 		return clinicorpApiRequest.call(
 			this,
 			'GET',
