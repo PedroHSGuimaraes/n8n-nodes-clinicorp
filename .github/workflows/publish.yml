@@ -1,37 +1,60 @@
 name: Publish to npm
 
-# Publishes the package to npm with a provenance statement whenever a version
-# tag (e.g. v1.0.0) is pushed. Provenance is mandatory for n8n verified nodes.
+# Publica o pacote com prova de origem (provenance) quando uma tag de versão (ex.: v1.2.0)
+# chega ao GitHub. Provenance é obrigatória para node verificado do n8n.
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*.*.*'
+  # Deixa o dono republicar (e aprovar de novo) sem mover a tag.
   workflow_dispatch:
 
 permissions:
   contents: read
-  id-token: write # required for npm provenance (OIDC)
+  id-token: write # necessário para a provenance do npm (OIDC)
 
 jobs:
   publish:
+    name: Publish with provenance
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # A mesma node-version do ci.yml.
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
         with:
-          node-version: '20.x'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 24
+          cache: npm
+          registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
-        # --ignore-scripts skips native builds (e.g. isolated-vm from n8n-workflow),
-        # which aren't needed to compile/publish this node.
-        run: npm ci --ignore-scripts
+        run: npm ci
+
+      # Impede publicar uma tag que não bate com a versão do package.json.
+      - name: Validate release tag
+        run: |
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          test "${GITHUB_REF_NAME}" = "v${PACKAGE_VERSION}"
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
 
       - name: Build
         run: npm run build
 
-      - name: Publish (with provenance)
-        run: npm publish --provenance --access public
+      # O token NPM_TOKEN é granular "Read and write (stage only)" (decisão do dono, 06/11/2026):
+      # com ele `npm publish` falha com E_STAGE_REQUIRED. A versão vai para a fila de espera e o
+      # dono a aprova com 2FA na aba Staged Packages do npmjs.com.
+      # `npm stage` só existe no npm 12; o Node LTS do runner traz o npm 11, por isso o npx fixa a versão.
+      # `prepublishOnly` roda `n8n-node prerelease`, que encerra com código 1 sem RELEASE_MODE.
+      - name: Stage package for approval
+        run: npx -y npm@12.2.2 stage publish --provenance --access public
         env:
+          RELEASE_MODE: 'true'
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

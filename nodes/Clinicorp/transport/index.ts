@@ -22,7 +22,7 @@ export async function clinicorpApiRequest(
 	endpoint: string,
 	body: IDataObject | IDataObject[] = {},
 	qs: IDataObject = {},
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	const options: IHttpRequestOptions = {
 		method,
 		baseURL: CLINICORP_BASE_URL,

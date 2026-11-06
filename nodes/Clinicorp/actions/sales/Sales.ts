@@ -76,8 +76,7 @@ export const salesDescription: INodeProperties[] = [
 			show: { ...showOnlyForSales, operation: ['getEstimatesAndConversion'] },
 		},
 		typeOptions: { loadOptionsMethod: 'getClinics' },
-		description:
-			'Clinic (id de uma clínica) to report on. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Clinic (ID de uma clínica) to report on. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: 'Group By',
@@ -113,16 +112,14 @@ export const salesDescription: INodeProperties[] = [
 				type: 'options',
 				default: '',
 				typeOptions: { loadOptionsMethod: 'getClinics' },
-				description:
-					'Optionally restrict results to a single clinic (id de uma clínica específica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				description: 'Optionally restrict results to a single clinic (ID de uma clínica específica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 			{
 				displayName: 'Patient ID',
 				name: 'patientId',
 				type: 'string',
 				default: '',
-				description:
-					'Optionally restrict results to the revenue of a single patient (id do paciente)',
+				description: 'Optionally restrict results to the revenue of a single patient (ID do paciente)',
 			},
 		],
 	},
@@ -132,7 +129,7 @@ export async function executeSales(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	const subscriberId = await getSubscriberId.call(this, i);
 	const from = this.getNodeParameter('from', i) as string;
 	const to = this.getNodeParameter('to', i) as string;

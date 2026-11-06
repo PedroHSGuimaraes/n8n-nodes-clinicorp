@@ -1,4 +1,4 @@
-import type { IExecuteFunctions, INodeProperties } from 'n8n-workflow';
+import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workflow';
 
 import { clinicorpApiRequest, getSubscriberId } from '../../transport';
 
@@ -29,7 +29,7 @@ export async function executeUser(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	if (operation === 'getMany') {
 		const subscriberId = await getSubscriberId.call(this, i);
 

@@ -66,8 +66,7 @@ export const operationalDescription: INodeProperties[] = [
 		default: '',
 		displayOptions: { show: { ...showOnlyForOperational, operation: ['getMissGoals'] } },
 		typeOptions: { loadOptionsMethod: 'getClinics' },
-		description:
-			'Optionally restrict results to a single clinic (id de uma clínica específica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Optionally restrict results to a single clinic (ID de uma clínica específica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 
 	// ----- Get Sales Goals -----
@@ -79,8 +78,7 @@ export const operationalDescription: INodeProperties[] = [
 		default: '',
 		displayOptions: { show: { ...showOnlyForOperational, operation: ['getSalesGoals'] } },
 		typeOptions: { loadOptionsMethod: 'getClinics' },
-		description:
-			'Clinic (id de uma clínica) to report the sales goals for. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Clinic (ID de uma clínica) to report the sales goals for. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 ];
 
@@ -88,7 +86,7 @@ export async function executeOperational(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	const subscriberId = await getSubscriberId.call(this, i);
 	const from = this.getNodeParameter('from', i) as string;
 	const to = this.getNodeParameter('to', i) as string;

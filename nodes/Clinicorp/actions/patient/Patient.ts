@@ -98,6 +98,7 @@ export const patientDescription: INodeProperties[] = [
 				displayName: 'Email',
 				name: 'email',
 				type: 'string',
+				placeholder: 'name@email.com',
 				default: '',
 				description: 'Email address of the patient',
 			},
@@ -171,6 +172,7 @@ export const patientDescription: INodeProperties[] = [
 				displayName: 'Email',
 				name: 'email',
 				type: 'string',
+				placeholder: 'name@email.com',
 				default: '',
 				description: 'Search by patient email address',
 			},
@@ -230,8 +232,7 @@ export const patientDescription: INodeProperties[] = [
 		default: '',
 		displayOptions: { show: { ...showOnlyForPatients, operation: ['getEstimateTotals'] } },
 		typeOptions: { loadOptionsMethod: 'getClinics' },
-		description:
-			'Optionally restrict the totals to a single clinic (id de uma clínica específica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Optionally restrict the totals to a single clinic (ID de uma clínica específica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 
 	// ----- Get Many Appointments -----
@@ -242,7 +243,7 @@ export const patientDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForPatients, operation: ['getManyAppointments'] } },
-		description: 'Unique ID of the patient (id do paciente) whose appointments will be listed',
+		description: 'Unique ID of the patient (ID do paciente) whose appointments will be listed',
 	},
 ];
 
@@ -250,7 +251,7 @@ export async function executePatient(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	if (operation === 'create') {
 		const subscriberId = await getSubscriberId.call(this, i);
 		const name = this.getNodeParameter('name', i) as string;

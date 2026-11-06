@@ -118,7 +118,7 @@ export const appointmentDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['cancel'] } },
-		description: 'Unique ID of the appointment (id do agendamento) to cancel',
+		description: 'Unique ID of the appointment (ID do agendamento) to cancel',
 	},
 
 	// ----- Change Status -----
@@ -152,7 +152,7 @@ export const appointmentDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['confirm'] } },
-		description: 'Unique ID of the appointment (id do agendamento) to confirm',
+		description: 'Unique ID of the appointment (ID do agendamento) to confirm',
 	},
 
 	// ----- Create -----
@@ -202,8 +202,7 @@ export const appointmentDescription: INodeProperties[] = [
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['create'] } },
 		typeOptions: { loadOptionsMethod: 'getClinics' },
-		description:
-			'Clinic where the appointment will be created (id da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Clinic where the appointment will be created (ID da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: 'Professional Name or ID',
@@ -213,8 +212,7 @@ export const appointmentDescription: INodeProperties[] = [
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['create'] } },
 		typeOptions: { loadOptionsMethod: 'getProfessionals' },
-		description:
-			'Professional who will attend the appointment (id do profissional). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Professional who will attend the appointment (ID do profissional). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -227,7 +225,7 @@ export const appointmentDescription: INodeProperties[] = [
 			{
 				displayName: 'Category Color',
 				name: 'categoryColor',
-				type: 'string',
+				type: 'color',
 				default: '',
 				description:
 					'Color used to identify the appointment category in the calendar, as a hex code, e.g. #009688',
@@ -243,6 +241,7 @@ export const appointmentDescription: INodeProperties[] = [
 				displayName: 'Email',
 				name: 'email',
 				type: 'string',
+				placeholder: 'name@email.com',
 				default: '',
 				description: 'Email address of the patient',
 			},
@@ -259,8 +258,7 @@ export const appointmentDescription: INodeProperties[] = [
 				name: 'patientPersonId',
 				type: 'string',
 				default: '',
-				description:
-					'Existing patient person ID (id da pessoa) to link the appointment to. Find it with the Patient > Get operation. Leave empty to book using only the patient name.',
+				description: 'Existing patient person ID (ID da pessoa) to link the appointment to. Find it with the Patient > Get operation. Leave empty to book using only the patient name.',
 			},
 			{
 				displayName: 'Procedures',
@@ -315,8 +313,7 @@ export const appointmentDescription: INodeProperties[] = [
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['createOnlineScheduling'] } },
 		typeOptions: { loadOptionsMethod: 'getClinics' },
-		description:
-			'Clinic for the online scheduling request (id da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Clinic for the online scheduling request (ID da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: 'Professional Name or ID',
@@ -325,8 +322,7 @@ export const appointmentDescription: INodeProperties[] = [
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['createOnlineScheduling'] } },
 		typeOptions: { loadOptionsMethod: 'getProfessionals' },
-		description:
-			'Professional requested for the online scheduling (id do profissional). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Professional requested for the online scheduling (ID do profissional). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -355,6 +351,7 @@ export const appointmentDescription: INodeProperties[] = [
 				displayName: 'Email',
 				name: 'email',
 				type: 'string',
+				placeholder: 'name@email.com',
 				default: '',
 				description: 'Email address of the patient',
 			},
@@ -443,7 +440,7 @@ export const appointmentDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['get'] } },
-		description: 'Unique ID of the appointment (id do agendamento) to retrieve',
+		description: 'Unique ID of the appointment (ID do agendamento) to retrieve',
 	},
 
 	// ----- Get Available Days -----
@@ -555,8 +552,7 @@ export const appointmentDescription: INodeProperties[] = [
 				type: 'options',
 				default: '',
 				typeOptions: { loadOptionsMethod: 'getClinics' },
-				description:
-					'Optionally restrict results to a single clinic (id da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				description: 'Optionally restrict results to a single clinic (ID da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 			{
 				displayName: 'Group By',
@@ -602,8 +598,7 @@ export const appointmentDescription: INodeProperties[] = [
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['getMany'] } },
 		typeOptions: { loadOptionsMethod: 'getClinics' },
-		description:
-			'Clinic whose appointments should be listed (id da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Clinic whose appointments should be listed (ID da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -625,7 +620,7 @@ export const appointmentDescription: INodeProperties[] = [
 				name: 'patientId',
 				type: 'string',
 				default: '',
-				description: 'Restrict results to the appointments of a single patient (id do paciente)',
+				description: 'Restrict results to the appointments of a single patient (ID do paciente)',
 			},
 		],
 	},
@@ -678,8 +673,7 @@ export const appointmentDescription: INodeProperties[] = [
 				type: 'options',
 				default: '',
 				typeOptions: { loadOptionsMethod: 'getClinics' },
-				description:
-					'Optionally restrict results to a single clinic (id da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				description: 'Optionally restrict results to a single clinic (ID da clínica). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 		],
 	},
@@ -689,7 +683,7 @@ export async function executeAppointment(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	if (operation === 'cancel') {
 		const subscriberId = await getSubscriberId.call(this, i);
 		const id = this.getNodeParameter('cancelId', i) as string;

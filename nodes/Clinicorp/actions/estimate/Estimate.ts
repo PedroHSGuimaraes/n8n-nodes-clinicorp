@@ -51,7 +51,7 @@ export const estimateDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForEstimates, operation: ['get'] } },
-		description: 'Unique ID of the estimate/treatment (id do orçamento) to retrieve',
+		description: 'Unique ID of the estimate/treatment (ID do orçamento) to retrieve',
 	},
 
 	// ----- Get Many -----
@@ -82,8 +82,7 @@ export const estimateDescription: INodeProperties[] = [
 		default: '',
 		displayOptions: { show: { ...showOnlyForEstimates, operation: ['getMany'] } },
 		typeOptions: { loadOptionsMethod: 'getClinics' },
-		description:
-			'Optionally restrict results to a single clinic (id de uma clínica específica), useful for multi-clinic units. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Optionally restrict results to a single clinic (ID de uma clínica específica), useful for multi-clinic units. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 ];
 
@@ -91,7 +90,7 @@ export async function executeEstimate(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	const subscriberId = await getSubscriberId.call(this, i);
 
 	if (operation === 'get') {

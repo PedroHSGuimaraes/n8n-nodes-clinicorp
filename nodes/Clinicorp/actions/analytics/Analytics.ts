@@ -53,7 +53,7 @@ export async function executeAnalytics(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	if (operation === 'getResults') {
 		const subscriberId = await getSubscriberId.call(this, i);
 		const from = this.getNodeParameter('from', i) as string;

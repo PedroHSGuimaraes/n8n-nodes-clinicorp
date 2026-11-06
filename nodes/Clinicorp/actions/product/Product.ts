@@ -71,51 +71,19 @@ export const productDescription: INodeProperties[] = [
 				displayName: 'Product',
 				values: [
 					{
-						displayName: 'Code',
-						name: 'code',
-						type: 'string',
-						required: true,
-						default: '',
-						description: 'Internal code of the product (código do produto)',
-					},
-					{
-						displayName: 'Name',
-						name: 'name',
-						type: 'string',
-						required: true,
-						default: '',
-						description: 'Name of the product (nome do produto)',
-					},
-					{
-						displayName: 'Quantity',
-						name: 'quantity',
-						type: 'number',
-						required: true,
-						default: 1,
-						description: 'Quantity of the product being ordered',
-					},
-					{
-						displayName: 'Unit Price',
-						name: 'unitPrice',
-						type: 'number',
-						required: true,
-						default: 0,
-						description: 'Price per unit of the product (preço unitário)',
-					},
-					{
-						displayName: 'Unit Of Measurement',
-						name: 'unitOfMeasurement',
-						type: 'string',
-						required: true,
-						default: '',
-						description: 'Unit of measurement of the product, e.g. un, box, kg',
-					},
-					{
 						displayName: 'Brand',
 						name: 'brand',
 						type: 'string',
 						default: '',
 						description: 'Brand of the product (marca)',
+					},
+					{
+						displayName: 'Code',
+						name: 'code',
+						type: 'string',
+							required:	true,
+						default: '',
+						description: 'Internal code of the product (código do produto)',
 					},
 					{
 						displayName: 'Description',
@@ -129,15 +97,22 @@ export const productDescription: INodeProperties[] = [
 						name: 'expirationDate',
 						type: 'dateTime',
 						default: '',
-						description:
-							'Expiration date of the product. Only the date part (YYYY-MM-DD) is sent to Clinicorp.',
+						description: 'Expiration date of the product. Only the date part (YYYY-MM-DD) is sent to Clinicorp.',
 					},
 					{
 						displayName: 'Lot',
 						name: 'lot',
 						type: 'string',
 						default: '',
-						description: 'Lot / batch number of the product (lote)',
+						description: 'Lot	/	batch number of the product (lote)',
+					},
+					{
+						displayName: 'Name',
+						name: 'name',
+						type: 'string',
+							required:	true,
+						default: '',
+						description: 'Name of the product (nome do produto)',
 					},
 					{
 						displayName: 'Notes',
@@ -145,6 +120,14 @@ export const productDescription: INodeProperties[] = [
 						type: 'string',
 						default: '',
 						description: 'Free-form notes about the product',
+					},
+					{
+						displayName: 'Quantity',
+						name: 'quantity',
+						type: 'number',
+							required:	true,
+						default: 1,
+						description: 'Quantity of the product being ordered',
 					},
 					{
 						displayName: 'Storage Location',
@@ -160,6 +143,22 @@ export const productDescription: INodeProperties[] = [
 						default: '',
 						description: 'Supplier of the product (fornecedor)',
 					},
+					{
+						displayName: 'Unit Of Measurement',
+						name: 'unitOfMeasurement',
+						type: 'string',
+							required:	true,
+						default: '',
+						description: 'Unit of measurement of the product, e.g. un, box, kg',
+					},
+					{
+						displayName: 'Unit Price',
+						name: 'unitPrice',
+						type: 'number',
+							required:	true,
+						default: 0,
+						description: 'Price per unit of the product (preço unitário)',
+					},
 				],
 			},
 		],
@@ -170,7 +169,7 @@ export async function executeProduct(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	if (operation === 'createOrder') {
 		const clinic = this.getNodeParameter('clinic', i) as string;
 		const orderCode = this.getNodeParameter('orderCode', i) as string;

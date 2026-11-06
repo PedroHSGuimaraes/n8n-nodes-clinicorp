@@ -116,6 +116,6 @@ Proof: walk - o dono aprova a versão com 2FA no npmjs.com e roda `npm view n8n-
 
 - **Settled mid-build:** nenhuma
 - **Dispatched:** nenhum
-- **Boundary:** nenhum check fechado ainda
+- **Boundary:** C1-C5 fechados (S1); lint com 0 erros
 - **Abandoned:** nada
 - **Walked:** n/a - sem tela capturada

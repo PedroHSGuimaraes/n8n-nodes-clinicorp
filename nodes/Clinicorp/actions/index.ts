@@ -1,4 +1,4 @@
-import type { IExecuteFunctions, INodeProperties, INodePropertyOptions } from 'n8n-workflow';
+import type { IDataObject, IExecuteFunctions, INodeProperties, INodePropertyOptions } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
 import { analyticsDescription, executeAnalytics } from './analytics/Analytics';
@@ -115,7 +115,7 @@ export async function executeResource(
 	resource: string,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	switch (resource) {
 		case 'analytics':
 			return executeAnalytics.call(this, operation, i);
@@ -132,7 +132,7 @@ export async function executeResource(
 		case 'financial':
 			return executeFinancial.call(this, operation, i);
 		case 'group':
-			return executeGroup.call(this, operation, i);
+			return executeGroup.call(this, operation);
 		case 'migration':
 			return executeMigration.call(this, operation, i);
 		case 'operational':

@@ -39,7 +39,7 @@ export async function executeProfessional(
 	this: IExecuteFunctions,
 	operation: string,
 	i: number,
-): Promise<any> {
+): Promise<IDataObject | IDataObject[]> {
 	if (operation === 'getMany') {
 		const fromOnlineScheduling = this.getNodeParameter('fromOnlineScheduling', i, false) as boolean;
 
