@@ -155,6 +155,8 @@ A versão nova chega ao npm pelo fluxo stage-only, com README completo.
 | `timeout` de 30000 ms | 30 segundos em toda chamada | Acima do p99 esperado de uma API de gestão clínica; a doc não publica limite | n |
 | Procedimentos na criação de agendamento | Enviar os nomes juntos por vírgula | É o formato da 1.1.2; a doc não confirma ID | n |
 | Query do paciente | Patient > Get continua enviando `PatientId` como na 1.1.2, embora a doc cite `patient_id`; o ID de paciente é opcional (há filtros por nome, CPF, e-mail e telefone), então só ganha dica | Mudar o nome da query alteraria a versão 1; a doc publicada é a mais rasa que a do código | n |
+| Cor da categoria (Appointment > Create) | Na versão 2 o campo `categoryColor` vira o tipo `color`; na versão 1 continua texto | O lint oficial exige `color` para parâmetro de cor, e a versão 1 não pode mudar de tipo (AD-002) | n |
+| Valor do seletor de procedimentos | O próprio nome do procedimento | A API recebe nomes em texto (formato da 1.1.2) | n |
 | Campos que já são lista (clínica, profissional, status) | Ficam como estão nas duas versões | Já são guiados; mudar só trocaria o formato | n |
 | Mensagens e rótulos do node | Continuam em inglês, como hoje e como o resto do n8n | A UX guideline do n8n escreve em inglês | n |
 | Padrão de teste | `node --test test/*.test.cjs` sobre o `dist`, com contexto falso que grava a requisição | O repo não tem teste; segue o modelo do Vizard | n |

@@ -2,12 +2,13 @@ import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workfl
 
 import { clinicorpApiRequest, getSubscriberId } from '../../transport';
 import { toApiDate } from '../../helpers/format';
+import { replaceOption, splitByVersion } from '../../helpers/versions';
 
 const showOnlyForPatients = {
 	resource: ['patient'],
 };
 
-export const patientDescription: INodeProperties[] = [
+const patientBaseDescription: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
@@ -150,7 +151,9 @@ export const patientDescription: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		displayOptions: { show: { ...showOnlyForPatients, operation: ['get'] } },
-		description: 'Search by patient ID; leave empty to search by another field below',
+		placeholder: 'e.g. 5530119',
+		description:
+			'Search by patient ID; leave empty to search by another field below. Find the ID with Patient > Get using the name, CPF, email or phone.',
 	},
 	{
 		displayName: 'Additional Filters',
@@ -246,6 +249,27 @@ export const patientDescription: INodeProperties[] = [
 		description: 'Unique ID of the patient (ID do paciente) whose appointments will be listed',
 	},
 ];
+
+/**
+ * Descrição final do recurso. Na versão 2, o Additional Fields de Create troca o sexo (texto
+ * livre) por uma lista com M e F; a versão 1 fica com os mesmos nomes e tipos da 1.1.2.
+ */
+export const patientDescription: INodeProperties[] = splitByVersion(
+	patientBaseDescription,
+	(property) =>
+		property.name === 'additionalFields' &&
+		property.displayOptions?.show?.operation?.includes('create') === true,
+	(property) =>
+		replaceOption(property, 'sex', {
+			type: 'options',
+			options: [
+				{ name: 'Female', value: 'F' },
+				{ name: 'Male', value: 'M' },
+			],
+			default: 'F',
+			description: 'Patient sex as expected by Clinicorp',
+		}),
+);
 
 export async function executePatient(
 	this: IExecuteFunctions,

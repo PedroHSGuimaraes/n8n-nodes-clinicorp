@@ -2,6 +2,7 @@ import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workfl
 
 import { clinicorpApiRequest, getSubscriberId } from '../../transport';
 import { toApiDate } from '../../helpers/format';
+import { readRequiredId } from '../../helpers/guided';
 
 // ---------------------------------------------------------------------------
 // TEMPLATE RESOURCE — every other Clinicorp resource mirrors this file:
@@ -51,7 +52,9 @@ export const estimateDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForEstimates, operation: ['get'] } },
-		description: 'Unique ID of the estimate/treatment (ID do orçamento) to retrieve',
+		placeholder: 'e.g. 9921034',
+		description:
+			'Unique ID of the estimate/treatment (ID do orçamento) to retrieve. Find it with Estimate > Get Many.',
 	},
 
 	// ----- Get Many -----
@@ -94,7 +97,7 @@ export async function executeEstimate(
 	const subscriberId = await getSubscriberId.call(this, i);
 
 	if (operation === 'get') {
-		const treatmentId = this.getNodeParameter('treatmentId', i) as string;
+		const treatmentId = readRequiredId.call(this, 'treatmentId', 'Treatment ID', 'Estimate > Get Many', i);
 		return clinicorpApiRequest.call(
 			this,
 			'GET',

@@ -61,6 +61,8 @@ export class ClinicorpApi implements ICredentialType {
 		request: {
 			baseURL: 'https://api.clinicorp.com/rest/v1',
 			url: '/professional/list_all_professionals',
+			// O teste de credencial também não pode esperar para sempre (mesmo limite do node).
+			timeout: 30000,
 		},
 	};
 }

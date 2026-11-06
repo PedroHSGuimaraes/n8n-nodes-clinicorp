@@ -4,8 +4,9 @@ import type {
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
+	JsonObject,
 } from 'n8n-workflow';
-import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
+import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
 import { executeResource, resourceOptions, resourceProperties } from './actions';
 import { loadOptions } from './methods/loadOptions';
@@ -16,7 +17,9 @@ export class Clinicorp implements INodeType {
 		name: 'clinicorp',
 		icon: { light: 'file:clinicorp.svg', dark: 'file:clinicorp.dark.svg' },
 		group: ['transform'],
-		version: 1,
+		// Versão 2 traz os campos guiados; a 1 segue igual para workflows salvos (ver .specs).
+		version: [1, 2],
+		defaultVersion: 2,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		description:
 			'Read and write data in Clinicorp, the dental and clinic management platform. Query estimates (orçamentos), patients, appointments (agenda), financial reports, payments, sales and conversion, procedures, professionals, clinics, CRM leads, analytics and goals; and create patients, appointments, CRM leads and purchase orders. Conventions: dates are sent as YYYY-MM-DD and times as 24-hour HH:mm; IDs (clinic, professional, status) must come from the matching list operation, never invented; the Subscriber ID is read automatically from the credential, so it is never an input. To book an appointment, first read availability (Clinic > Get Available Times, or Appointment > Get Available Times when using a booking Code Link), then call Appointment > Create with that exact slot. Usable as an AI Agent tool.',
@@ -73,6 +76,13 @@ export class Clinicorp implements INodeType {
 						pairedItem: { item: i },
 					});
 					continue;
+				}
+				// Erro da API continua NodeApiError (o n8n mostra o código HTTP e a resposta); só
+				// marcamos o item. O n8n reaproveita a causa quando o erro já é um NodeApiError.
+				if (error instanceof NodeApiError) {
+					throw new NodeApiError(this.getNode(), error as unknown as JsonObject, {
+						itemIndex: i,
+					});
 				}
 				throw new NodeOperationError(this.getNode(), error as Error, { itemIndex: i });
 			}

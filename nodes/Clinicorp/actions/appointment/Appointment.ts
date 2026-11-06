@@ -2,12 +2,14 @@ import type { IDataObject, IExecuteFunctions, INodeProperties } from 'n8n-workfl
 
 import { clinicorpApiRequest, getSubscriberId } from '../../transport';
 import { toApiDate, pickMapped } from '../../helpers/format';
+import { checkTime, normalizeProcedures, readRequiredId } from '../../helpers/guided';
+import { replaceOption, splitByVersion } from '../../helpers/versions';
 
 const showOnlyForAppointments = {
 	resource: ['appointment'],
 };
 
-export const appointmentDescription: INodeProperties[] = [
+const appointmentBaseDescription: INodeProperties[] = [
 	{
 		displayName: 'Operation',
 		name: 'operation',
@@ -118,7 +120,9 @@ export const appointmentDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['cancel'] } },
-		description: 'Unique ID of the appointment (ID do agendamento) to cancel',
+		placeholder: 'e.g. 4817203',
+		description:
+			'Unique ID of the appointment (ID do agendamento) to cancel. Find it with Appointment > Get Many.',
 	},
 
 	// ----- Change Status -----
@@ -129,8 +133,9 @@ export const appointmentDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['changeStatus'] } },
+		placeholder: 'e.g. 4817203',
 		description:
-			'ID of the appointment to update. To update several appointments at once, send comma-separated IDs like 1,2,3.',
+			'ID of the appointment to update. Find it with Appointment > Get Many. To update several appointments at once, send comma-separated IDs like 1,2,3.',
 	},
 	{
 		displayName: 'Status Name or ID',
@@ -152,7 +157,9 @@ export const appointmentDescription: INodeProperties[] = [
 		required: true,
 		default: '',
 		displayOptions: { show: { ...showOnlyForAppointments, operation: ['confirm'] } },
-		description: 'Unique ID of the appointment (ID do agendamento) to confirm',
+		placeholder: 'e.g. 4817203',
+		description:
+			'Unique ID of the appointment (ID do agendamento) to confirm. Find it with Appointment > Get Many.',
 	},
 
 	// ----- Create -----
@@ -225,7 +232,9 @@ export const appointmentDescription: INodeProperties[] = [
 			{
 				displayName: 'Category Color',
 				name: 'categoryColor',
-				type: 'color',
+				// A versão 1 guarda este campo como texto; o tipo `color` só vale na versão 2 (ver abaixo).
+				// eslint-disable-next-line n8n-nodes-base/node-param-color-type-unused
+				type: 'string',
 				default: '',
 				description:
 					'Color used to identify the appointment category in the calendar, as a hex code, e.g. #009688',
@@ -679,6 +688,30 @@ export const appointmentDescription: INodeProperties[] = [
 	},
 ];
 
+/**
+ * Descrição final do recurso. Na versão 2, o Additional Fields de Create troca os procedimentos
+ * (texto livre) por uma lista da conta e a cor da categoria por um seletor de cor; a versão 1 fica
+ * com os mesmos nomes e tipos da 1.1.2.
+ */
+export const appointmentDescription: INodeProperties[] = splitByVersion(
+	appointmentBaseDescription,
+	(property) =>
+		property.name === 'additionalFields' &&
+		property.displayOptions?.show?.operation?.includes('create') === true,
+	(property) =>
+		replaceOption(
+			replaceOption(property, 'procedures', {
+				type: 'multiOptions',
+				typeOptions: { loadOptionsMethod: 'getProcedures' },
+				default: [],
+				description:
+					'Procedures associated with the appointment. Choose from the list, or specify names using an <a href="https://docs.n8n.io/code/expressions/">expression</a>. They are sent to Clinicorp separated by commas.',
+			}),
+			'categoryColor',
+			{ type: 'color' },
+		),
+);
+
 export async function executeAppointment(
 	this: IExecuteFunctions,
 	operation: string,
@@ -686,7 +719,7 @@ export async function executeAppointment(
 ): Promise<IDataObject | IDataObject[]> {
 	if (operation === 'cancel') {
 		const subscriberId = await getSubscriberId.call(this, i);
-		const id = this.getNodeParameter('cancelId', i) as string;
+		const id = readRequiredId.call(this, 'cancelId', 'Appointment ID', 'Appointment > Get Many', i);
 		return clinicorpApiRequest.call(this, 'POST', '/appointment/cancel_appointment', {
 			subscriber_id: subscriberId,
 			id,
@@ -694,7 +727,13 @@ export async function executeAppointment(
 	}
 
 	if (operation === 'changeStatus') {
-		const id = this.getNodeParameter('changeStatusId', i) as string;
+		const id = readRequiredId.call(
+			this,
+			'changeStatusId',
+			'Appointment ID',
+			'Appointment > Get Many',
+			i,
+		);
 		const statusId = this.getNodeParameter('statusId', i) as string;
 		return clinicorpApiRequest.call(
 			this,
@@ -710,7 +749,7 @@ export async function executeAppointment(
 
 	if (operation === 'confirm') {
 		const subscriberId = await getSubscriberId.call(this, i);
-		const id = this.getNodeParameter('confirmId', i) as string;
+		const id = readRequiredId.call(this, 'confirmId', 'Appointment ID', 'Appointment > Get Many', i);
 		return clinicorpApiRequest.call(this, 'POST', '/appointment/confirm_appointment', {
 			subscriber_id: subscriberId,
 			id,
@@ -718,13 +757,17 @@ export async function executeAppointment(
 	}
 
 	if (operation === 'create') {
-		const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IDataObject;
+		// Na versão 2 os procedimentos chegam como lista; viram o texto que a API espera.
+		const additionalFields = normalizeProcedures(
+			this,
+			this.getNodeParameter('additionalFields', i, {}) as IDataObject,
+		);
 
 		const body: IDataObject = {
 			PatientName: this.getNodeParameter('patientName', i) as string,
 			date: toApiDate(this.getNodeParameter('createDate', i) as string),
-			fromTime: this.getNodeParameter('fromTime', i) as string,
-			toTime: this.getNodeParameter('toTime', i) as string,
+			fromTime: checkTime.call(this, this.getNodeParameter('fromTime', i) as string, 'From Time', i),
+			toTime: checkTime.call(this, this.getNodeParameter('toTime', i) as string, 'To Time', i),
 			Clinic_BusinessId: this.getNodeParameter('createClinicId', i) as string,
 			Dentist_PersonId: this.getNodeParameter('createDentistId', i) as string,
 		};
@@ -748,6 +791,9 @@ export async function executeAppointment(
 
 	if (operation === 'createOnlineScheduling') {
 		const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IDataObject;
+		// Os horários opcionais também são validados na versão 2 antes de a requisição sair.
+		checkTime.call(this, additionalFields.fromTime as string, 'From Time', i);
+		checkTime.call(this, additionalFields.toTime as string, 'To Time', i);
 
 		const body: IDataObject = {
 			PatientName: this.getNodeParameter('onlinePatientName', i) as string,

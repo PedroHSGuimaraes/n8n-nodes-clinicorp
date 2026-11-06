@@ -41,7 +41,7 @@ Proof: run unit | ✔ v1 não valida o horário
 
 ### S3 - campos guiados na versão 2
 
-**C10** - o node novo nasce com `typeVersion` 2 e expõe Procedures como `multiOptions` com `getProcedures` e Sex como `options` M e F (AC S3.1, S3.2)
+**C10** - o node novo nasce com `typeVersion` 2 e expõe Procedures como `multiOptions` com `getProcedures` e Sex como `options` M e F, e a cor da categoria como `color` (AC S3.1, S3.2)
 Proof: run unit | ✔ v2 expõe defaultVersion 2, procedimentos em lista e sexo em opções
 
 **C11** - v2 envia `Procedures` igual a `Limpeza, Restauração` com dois escolhidos e omite o campo sem escolha (AC S3.3, S3.4)
@@ -116,6 +116,6 @@ Proof: walk - o dono aprova a versão com 2FA no npmjs.com e roda `npm view n8n-
 
 - **Settled mid-build:** nenhuma
 - **Dispatched:** nenhum
-- **Boundary:** C1-C5 fechados (S1); lint com 0 erros
+- **Boundary:** C1-C18 fechados (S1 a S4) no commit seguinte à fae129e
 - **Abandoned:** nada
 - **Walked:** n/a - sem tela capturada

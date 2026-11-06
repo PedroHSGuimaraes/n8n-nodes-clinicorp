@@ -100,6 +100,11 @@ export const loadOptions = {
 
 	async getProcedures(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 		const items = await clinicorpApiRequest.call(this, 'GET', '/procedures/list');
-		return toOptions(items, ['ProcedureName', 'Description', 'name']);
+		// A API de agendamento recebe o NOME do procedimento (texto), não o ID; por isso o valor
+		// do seletor é o próprio nome.
+		return toOptions(items, ['ProcedureName', 'Description', 'name']).map((option) => ({
+			name: option.name,
+			value: option.name,
+		}));
 	},
 };
