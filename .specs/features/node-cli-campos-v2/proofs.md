@@ -1,6 +1,6 @@
 # node-cli-campos-v2 proofs
 
-**HEAD**: 9a7d8e3
+**HEAD**: 994215d
 **Tree**: clean
 **Shell**: /bin/sh
 **Result**: 25 pass, 0 fail
@@ -38,13 +38,13 @@
 `Run unit` - exit 0
 
 ```
-  ✔ ci.yml roda ci, lint, test e build com a node-version do publish (1.64764ms)
-✔ S1 toolchain do node-cli (6.579502ms)
+  ✔ ci.yml roda ci, lint, test e build com a node-version do publish (1.987607ms)
+✔ S1 toolchain do node-cli (7.690415ms)
 ▶ S5 lançamento 1.2.0
-  ✔ metadados da 1.2.0 e changelog (1.080118ms)
-  ✔ README segue o padrão completo (0.458496ms)
-  ✔ publish.yml publica por stage com RELEASE_MODE (0.965152ms)
-✔ S5 lançamento 1.2.0 (3.25174ms)
+  ✔ metadados da 1.2.0 e changelog (1.225961ms)
+  ✔ README segue o padrão completo (0.426587ms)
+  ✔ publish.yml publica por stage com RELEASE_MODE (1.001137ms)
+✔ S5 lançamento 1.2.0 (3.41416ms)
 ℹ tests 33
 ℹ suites 7
 ℹ pass 33
@@ -52,7 +52,7 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 483.434329
+ℹ duration_ms 550.073297
 ```
 
 `npm run lint` - exit 0
