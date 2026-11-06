@@ -115,7 +115,7 @@ Proof: walk - o dono aprova a versão com 2FA no npmjs.com e roda `npm view n8n-
 ## Handoff
 
 - **Settled mid-build:** nenhuma
-- **Dispatched:** nenhum
+- **Dispatched:** Verifier (sonnet) no HEAD 8b783be, returned: não
 - **Boundary:** C1-C21 fechados (S1 a S5); C22 é a aprovação do dono no npm
 - **Abandoned:** nada
 - **Walked:** n/a - sem tela capturada
